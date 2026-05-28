@@ -35,6 +35,12 @@
 - **方案**: 表单式编辑器，支持实时输入更新；图片操作（上传、AI生成、移除）预留回调接口
 - **变更**: 新增 src/components/NodeEditor.js，追加 editor.css 样式，重构 app.js 集成 NodeEditor
 
+### 2026-05-28: Task 6 - AI调用封装模块
+- **决策**: 创建 AI 类封装 Mimo 和通义千问 API 调用
+- **原因**: 需要支持 AI 生成思维导图功能，统一 API 调用接口
+- **方案**: 创建 src/core/ai.js，支持两种 AI 服务商，提供 generateMindmap 方法生成思维导图，parseResponse 解析响应
+- **变更**: 新增 src/core/ai.js，修改 app.js 导入 AI 类并添加测试代码
+
 ## 技术发现
 
 ### 模板项目特点
@@ -63,6 +69,13 @@
 - 空状态处理：未选中节点时显示提示
 - 支持 update() 方法切换编辑目标节点
 
+### AI调用封装模块特点
+- 支持两种AI服务商：Mimo（OpenAI格式）和通义千问（DashScope格式）
+- 统一的 AI 类接口，通过 provider 参数切换服务商
+- generateMindmap 方法：根据主题生成思维导图 Markdown 格式
+- parseResponse 方法：解析 AI 响应，提取节点数据
+- 错误处理：API 调用失败时抛出明确错误信息
+
 ## 进度追踪
 
 ### 已完成
@@ -78,6 +91,7 @@
 - [x] Task 2: App 类实现
 - [x] Task 3: NodeTree 树形结构组件
 - [x] Task 4: NodeEditor 节点编辑组件
+- [x] Task 6: AI调用封装模块
 
 ### 待完成
 - [ ] Task 5: Markdown 解析器
@@ -107,3 +121,11 @@
 - 重构 app.js：提取 state.nodes、实现节点选择联动 NodeTree ↔ NodeEditor
 - 添加 findNodeById、handleNodeChange 等辅助方法
 - 语法检查通过，代码已提交
+
+### Session 4: 2026-05-28 (Task 6)
+- 创建 AI 调用封装模块 src/core/ai.js
+- 支持 Mimo 和通义千问两种 AI 服务商
+- 提供 generateMindmap 方法生成思维导图
+- 修改 app.js 导入 AI 类并添加测试代码
+- 语法检查通过，开发服务器测试通过
+- 代码已提交
