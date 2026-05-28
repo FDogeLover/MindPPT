@@ -8,6 +8,7 @@
 | 2026-05-28 | Task 1: 项目基础设置 - 重构为编辑器 MVP |
 | 2026-05-28 | Task 2: App 类实现 |
 | 2026-05-28 | Task 3: NodeTree 树形结构组件 |
+| 2026-05-28 | Task 4: NodeEditor 节点编辑组件 |
 
 ## 决策日志
 
@@ -27,6 +28,12 @@
 - **原因**: 提供直观的树形结构视图，方便用户编辑思维导图节点
 - **方案**: 使用递归渲染实现树形结构，事件委托处理交互，CSS 变量保持样式一致性
 - **变更**: 新增 src/components/NodeTree.js、src/styles/editor.css，修改 app.js 和 index.html
+
+### 2026-05-28: Task 4 - NodeEditor 节点编辑组件
+- **决策**: 创建 NodeEditor 组件用于编辑器右侧面板下方区域
+- **原因**: 用户选中节点后需要编辑节点属性（主标题、副标题、图片）
+- **方案**: 表单式编辑器，支持实时输入更新；图片操作（上传、AI生成、移除）预留回调接口
+- **变更**: 新增 src/components/NodeEditor.js，追加 editor.css 样式，重构 app.js 集成 NodeEditor
 
 ## 技术发现
 
@@ -50,6 +57,12 @@
 - hover 时显示操作按钮（添加/删除）
 - 支持 update() 方法更新节点数据和选中状态
 
+### NodeEditor 组件特点
+- 表单式编辑：主标题、副标题实时同步到数据模型
+- 图片操作：上传、AI生成、移除，预留回调接口
+- 空状态处理：未选中节点时显示提示
+- 支持 update() 方法切换编辑目标节点
+
 ## 进度追踪
 
 ### 已完成
@@ -64,9 +77,10 @@
 - [x] Task 1: 项目基础设置 - 重构为编辑器 MVP
 - [x] Task 2: App 类实现
 - [x] Task 3: NodeTree 树形结构组件
+- [x] Task 4: NodeEditor 节点编辑组件
 
 ### 待完成
-- [ ] Task 4: Markdown 解析器
+- [ ] Task 5: Markdown 解析器
 - [ ] 添加示例图片资源到 project/assets/
 
 ## 调试经验
@@ -86,3 +100,10 @@
 - 重构 package.json、index.html、src/main.js、src/styles/main.css
 - 验证开发服务器能正常启动并返回正确 HTML
 - 初始化 git 仓库并提交
+
+### Session 3: 2026-05-28 (Task 4)
+- 创建 NodeEditor 组件，支持节点标题/副标题/图片编辑
+- 在 editor.css 追加编辑器表单样式
+- 重构 app.js：提取 state.nodes、实现节点选择联动 NodeTree ↔ NodeEditor
+- 添加 findNodeById、handleNodeChange 等辅助方法
+- 语法检查通过，代码已提交
