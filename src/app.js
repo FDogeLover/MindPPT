@@ -1,3 +1,5 @@
+import { NodeTree } from './components/NodeTree.js';
+
 export class App {
   constructor() {
     this.state = {
@@ -10,6 +12,7 @@ export class App {
 
   init() {
     this.render();
+    this.setupNodeTree();
   }
 
   render() {
@@ -36,5 +39,26 @@ export class App {
         </section>
       </main>
     `;
+  }
+
+  setupNodeTree() {
+    const nodeTreeContainer = document.getElementById('nodeTree');
+    if (nodeTreeContainer) {
+      this.nodeTree = new NodeTree(nodeTreeContainer, {
+        nodes: [
+          { id: '1', title: '根节点', subtitle: '主标题', children: [
+            { id: '2', title: '子节点1', subtitle: '描述' },
+            { id: '3', title: '子节点2', subtitle: '描述', children: [
+              { id: '4', title: '孙节点', subtitle: '描述' }
+            ]}
+          ]},
+          { id: '5', title: '另一个根节点', subtitle: '描述' }
+        ],
+        activeNodeId: '2',
+        onSelect: (id) => console.log('选择节点:', id),
+        onAdd: (id) => console.log('添加节点:', id),
+        onDelete: (id) => console.log('删除节点:', id)
+      });
+    }
   }
 }

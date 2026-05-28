@@ -1,0 +1,105 @@
+.node-tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.node-tree-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+.node-tree-list {
+  font-size: 0.9rem;
+}
+
+.tree-node {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tree-node:hover {
+  background: #f0f0f0;
+}
+
+.tree-node.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.tree-node.active .node-subtitle {
+  color: rgba(255,255,255,0.7);
+}
+
+.node-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.node-toggle {
+  width: 16px;
+  font-size: 0.7rem;
+  color: #999;
+}
+
+.node-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node-subtitle {
+  color: #666;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tree-node:hover .node-actions {
+  opacity: 1;
+}
+
+.btn-icon {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-icon:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.node-children {
+  margin-left: 20px;
+}
