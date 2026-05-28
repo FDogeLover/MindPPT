@@ -1,5 +1,6 @@
 import { NodeTree } from './components/NodeTree.js';
 import { NodeEditor } from './components/NodeEditor.js';
+import { Preview } from './components/Preview.js';
 
 export class App {
   constructor() {
@@ -24,6 +25,7 @@ export class App {
     this.render();
     this.setupNodeTree();
     this.setupNodeEditor();
+    this.setupPreview();
   }
 
   render() {
@@ -88,6 +90,11 @@ export class App {
       this.nodeEditor.update(activeNode);
     }
     
+    if (this.preview) {
+      const flatNodes = this.flattenNodes(this.state.nodes);
+      this.preview.update(flatNodes, id);
+    }
+    
     console.log('选择节点:', id);
   }
 
@@ -120,5 +127,27 @@ export class App {
 
   handleImageUpload(type) {
     console.log('图片上传:', type);
+  }
+
+  setupPreview() {
+    const previewContainer = document.getElementById('preview');
+    if (previewContainer) {
+      const flatNodes = this.flattenNodes(this.state.nodes);
+      this.preview = new Preview(previewContainer, {
+        nodes: flatNodes,
+        activeNodeId: this.state.activeNodeId,
+        onSelect: (id) => this.selectNode(id)
+      });
+    }
+  }
+
+  flattenNodes(nodes, result = []) {
+    for (const node of nodes) {
+      result.push({ id: node.id, title: node.title, subtitle: node.subtitle, image: node.image });
+      if (node.children) {
+        this.flattenNodes(node.children, result);
+      }
+    }
+    return result;
   }
 }
