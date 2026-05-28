@@ -173,9 +173,12 @@ export class App {
     if (savedProject) {
       this.state.nodes = savedProject.nodes || this.state.nodes;
       this.state.projectData = savedProject;
-      // 重新渲染节点树和预览
+      // 重新渲染节点树、编辑器和预览
       if (this.nodeTree) {
         this.nodeTree.update(this.state.nodes, this.state.activeNodeId);
+      }
+      if (this.nodeEditor) {
+        this.nodeEditor.update(this.getActiveNode());
       }
       if (this.preview) {
         const flatNodes = this.flattenNodes(this.state.nodes);
@@ -227,7 +230,7 @@ export class App {
         this.nodeTree.update(this.state.nodes, this.state.activeNodeId);
       }
       if (this.nodeEditor) {
-        this.nodeEditor.update(null);
+        this.nodeEditor.update(this.getActiveNode());
       }
       if (this.preview) {
         const flatNodes = this.flattenNodes(this.state.nodes);

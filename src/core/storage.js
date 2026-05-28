@@ -9,6 +9,16 @@ export class Storage {
       return true;
     } catch (error) {
       console.error('保存项目失败:', error);
+      
+      // 区分不同错误类型
+      if (error.name === 'QuotaExceededError') {
+        alert('存储空间不足，请尝试导出项目文件或清理浏览器缓存');
+      } else if (error.name === 'SecurityError') {
+        alert('隐私模式下无法保存项目，请使用文件导出功能');
+      } else {
+        alert('保存项目失败：' + error.message);
+      }
+      
       return false;
     }
   }
@@ -60,12 +70,30 @@ export class Storage {
           return;
         }
         
+        // 验证文件大小（限制10MB）
+        if (file.size > 10 * 1024 * 1024) {
+          reject(new Error('文件大小超过10MB限制'));
+          return;
+        }
+        
         try {
           const text = await file.text();
           const data = JSON.parse(text);
+          
+          // 验证数据结构
+          if (!data || typeof data !== 'object') {
+            reject(new Error('无效的项目文件格式'));
+            return;
+          }
+          
+          if (!Array.isArray(data.nodes)) {
+            reject(new Error('项目文件缺少nodes字段'));
+            return;
+          }
+          
           resolve(data);
         } catch (error) {
-          reject(error);
+          reject(new Error('文件解析失败：' + error.message));
         }
       };
       
