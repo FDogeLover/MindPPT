@@ -121,6 +121,10 @@ export class App {
       if (this.nodeTree) {
         this.nodeTree.update(this.state.nodes, this.state.activeNodeId);
       }
+      if (this.preview) {
+        const flatNodes = this.flattenNodes(this.state.nodes);
+        this.preview.update(flatNodes, this.state.activeNodeId);
+      }
       console.log('节点已更新:', changes);
     }
   }
