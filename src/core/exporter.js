@@ -1,27 +1,49 @@
+function escapeHtml(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export class Exporter {
   exportToHtml(projectData) {
-    const html = this.generateHtml(projectData);
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${projectData.name || 'mindmap'}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const html = this.generateHtml(projectData);
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${projectData.name || 'mindmap'}.html`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // 延迟清理，确保下载开始
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      alert('HTML文件导出成功');
+    } catch (error) {
+      console.error('导出HTML失败:', error);
+      alert('导出HTML失败：' + error.message);
+    }
   }
 
   generateHtml(projectData) {
     const nodesHtml = this.generateNodesHtml(projectData.nodes || []);
-
+    const escapedName = escapeHtml(projectData.name || '思维导图PPT');
+    
     return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${projectData.name || '思维导图PPT'}</title>
+  <title>${escapedName}</title>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fcfcf8; }
@@ -38,7 +60,7 @@ export class Exporter {
 </head>
 <body>
   <div class="container">
-    <h1>${projectData.name || '思维导图PPT'}</h1>
+    <h1>${escapedName}</h1>
     <div class="nodes">
       ${nodesHtml}
     </div>
@@ -48,14 +70,21 @@ export class Exporter {
   }
 
   generateNodesHtml(nodes) {
-    return nodes.map(node => `
-      <div class="node">
-        ${node.image ? `<img src="${node.image.src}" alt="${node.image.alt || ''}" class="node-image">` : ''}
-        <div class="node-text">
-          ${node.subtitle ? `<div class="node-subtitle">${node.subtitle}</div>` : ''}
-          <div class="node-title">${node.title || '未命名'}</div>
+    return nodes.map(node => {
+      const escapedTitle = escapeHtml(node.title || '未命名');
+      const escapedSubtitle = node.subtitle ? escapeHtml(node.subtitle) : '';
+      const escapedImageSrc = node.image ? escapeHtml(node.image.src) : '';
+      const escapedImageAlt = node.image ? escapeHtml(node.image.alt || '') : '';
+      
+      return `
+        <div class="node">
+          ${node.image ? `<img src="${escapedImageSrc}" alt="${escapedImageAlt}" class="node-image">` : ''}
+          <div class="node-text">
+            ${escapedSubtitle ? `<div class="node-subtitle">${escapedSubtitle}</div>` : ''}
+            <div class="node-title">${escapedTitle}</div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 }
