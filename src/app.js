@@ -3,6 +3,7 @@ import { NodeEditor } from './components/NodeEditor.js';
 import { Preview } from './components/Preview.js';
 import { AI } from './core/ai.js';
 import { Storage } from './core/storage.js';
+import { Exporter } from './core/exporter.js';
 
 export class App {
   constructor() {
@@ -22,6 +23,7 @@ export class App {
     };
     this.container = document.getElementById('app');
     this.storage = new Storage();
+    this.exporter = new Exporter();
   }
 
   init() {
@@ -268,8 +270,8 @@ export class App {
       createdAt: this.state.projectData?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    
-    this.storage.exportToFile(projectData);
-    console.log('项目已导出');
+
+    this.exporter.exportToHtml(projectData);
+    console.log('HTML已导出');
   }
 }
