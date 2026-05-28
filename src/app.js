@@ -281,6 +281,33 @@ export class App {
     this.exporter.exportToHtml(this.state.projectData);
   }
 
+  nodesToMarkdown(nodes, level = 0) {
+    let markdown = '';
+    const indent = '  '.repeat(level);
+    
+    for (const node of nodes) {
+      const subtitle = node.subtitle || '';
+      const title = node.title || '未命名';
+      
+      if (subtitle) {
+        markdown += `${indent}- ${subtitle}\n`;
+        markdown += `${indent}  ${title}\n`;
+      } else {
+        markdown += `${indent}- ${title}\n`;
+      }
+      
+      if (node.image) {
+        markdown += `${indent}  @image ${node.image.src}\n`;
+      }
+      
+      if (node.children && node.children.length > 0) {
+        markdown += this.nodesToMarkdown(node.children, level + 1);
+      }
+    }
+    
+    return markdown;
+  }
+
   handleImageUpload(type) {
     if (type === 'local') {
       const input = document.createElement('input');
