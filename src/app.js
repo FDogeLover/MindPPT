@@ -27,30 +27,6 @@ export class App {
     this.setupNodeTree();
     this.setupNodeEditor();
     this.setupPreview();
-    
-    // 测试AI模块
-    this.testAI();
-  }
-  
-  async testAI() {
-    console.log('测试AI模块...');
-    try {
-      const ai = new AI({
-        provider: 'mimo',
-        apiKey: 'test-key',
-        model: 'mimo-v2.5'
-      });
-      
-      console.log('AI实例创建成功:', ai);
-      console.log('AI提供商:', ai.provider);
-      console.log('AI模型:', ai.model);
-      
-      // 注意：这里不会实际调用API，因为apiKey是测试密钥
-      // 实际使用时需要用户提供真实的API密钥
-      console.log('AI模块初始化完成，等待用户输入主题进行测试');
-    } catch (error) {
-      console.error('AI模块测试失败:', error);
-    }
   }
 
   render() {

@@ -52,58 +52,69 @@ export class AI {
     }
   }
 
-  async callMimo(prompt) {
-    const response = await fetch(`${AI_PROVIDERS.mimo.endpoint}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages: [
-          { role: 'system', content: '你是一个专业的思维导图生成助手。' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Mimo API调用失败: ${response.statusText}`);
+  async callWithRetry(fn, maxRetries = 3, timeoutMs = 30000) {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        
+        const result = await fn(controller.signal);
+        clearTimeout(timeoutId);
+        return result;
+      } catch (error) {
+        if (i === maxRetries - 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
     }
-    
-    return await response.json();
+  }
+
+  async callApi(endpoint, body, headers = {}) {
+    return this.callWithRetry(async (signal) => {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
+          ...headers
+        },
+        body: JSON.stringify(body),
+        signal
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API调用失败: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    });
+  }
+
+  async callMimo(prompt) {
+    return this.callApi(`${AI_PROVIDERS.mimo.endpoint}/chat/completions`, {
+      model: this.model,
+      messages: [
+        { role: 'system', content: '你是一个专业的思维导图生成助手。' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
+    });
   }
 
   async callQwen(prompt) {
-    const response = await fetch(`${AI_PROVIDERS.qwen.endpoint}/services/aigc/text-generation/generation`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+    return this.callApi(`${AI_PROVIDERS.qwen.endpoint}/services/aigc/text-generation/generation`, {
+      model: this.model,
+      input: {
+        messages: [
+          { role: 'system', content: '你是一个专业的思维导图生成助手。' },
+          { role: 'user', content: prompt }
+        ]
       },
-      body: JSON.stringify({
-        model: this.model,
-        input: {
-          messages: [
-            { role: 'system', content: '你是一个专业的思维导图生成助手。' },
-            { role: 'user', content: prompt }
-          ]
-        },
-        parameters: {
-          temperature: 0.7,
-          max_tokens: 2000
-        }
-      })
+      parameters: {
+        temperature: 0.7,
+        max_tokens: 2000
+      }
     });
-    
-    if (!response.ok) {
-      throw new Error(`通义千问API调用失败: ${response.statusText}`);
-    }
-    
-    return await response.json();
   }
 
   parseResponse(response) {
@@ -111,22 +122,42 @@ export class AI {
       const content = response.choices?.[0]?.message?.content || 
                       response.output?.text || '';
       
-      // 解析Markdown格式的思维导图
+      // 解析两行格式的思维导图
       const lines = content.split('\n').filter(line => line.trim());
       const nodes = [];
       let nodeId = 1;
+      let i = 0;
       
-      for (const line of lines) {
+      while (i < lines.length) {
+        const line = lines[i];
         const match = line.match(/^(\s*)-\s+(.+)$/);
+        
         if (match) {
           const indent = match[1].length;
-          const text = match[2].trim();
+          const firstLine = match[2].trim();
+          
+          // 检查下一行是否是续行（缩进更多且不是列表项）
+          let secondLine = '';
+          if (i + 1 < lines.length) {
+            const nextLine = lines[i + 1];
+            const nextMatch = nextLine.match(/^(\s*)-\s+(.+)$/);
+            const nextIndent = nextLine.match(/^(\s*)/)?.[1].length || 0;
+            
+            if (!nextMatch && nextIndent > indent) {
+              secondLine = nextLine.trim();
+              i++;
+            }
+          }
+          
           nodes.push({
             id: `node-${nodeId++}`,
-            title: text,
+            title: secondLine || firstLine,
+            subtitle: secondLine ? firstLine : '',
             level: Math.floor(indent / 2)
           });
         }
+        
+        i++;
       }
       
       return nodes;
