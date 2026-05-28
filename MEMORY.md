@@ -9,6 +9,8 @@
 | 2026-05-28 | Task 2: App 类实现 |
 | 2026-05-28 | Task 3: NodeTree 树形结构组件 |
 | 2026-05-28 | Task 4: NodeEditor 节点编辑组件 |
+| 2026-05-28 | Task 6: AI调用封装模块 |
+| 2026-05-28 | Task 7: 存储管理模块 |
 
 ## 决策日志
 
@@ -40,6 +42,12 @@
 - **原因**: 需要支持 AI 生成思维导图功能，统一 API 调用接口
 - **方案**: 创建 src/core/ai.js，支持两种 AI 服务商，提供 generateMindmap 方法生成思维导图，parseResponse 解析响应
 - **变更**: 新增 src/core/ai.js，修改 app.js 导入 AI 类并添加测试代码
+
+### 2026-05-28: Task 7 - 存储管理模块
+- **决策**: 创建 Storage 类封装浏览器本地存储和文件导入导出功能
+- **原因**: 需要支持项目保存、加载、导入导出，提供数据持久化能力
+- **方案**: 创建 src/core/storage.js，提供 saveProject、loadProject、clearProject、exportToFile、importFromFile 方法
+- **变更**: 新增 src/core/storage.js，修改 app.js 导入 Storage 类并添加按钮事件处理
 
 ## 技术发现
 
@@ -76,6 +84,13 @@
 - parseResponse 方法：解析 AI 响应，提取节点数据
 - 错误处理：API 调用失败时抛出明确错误信息
 
+### Storage存储管理模块特点
+- 浏览器本地存储：使用 localStorage 保存项目数据
+- 文件导入导出：支持 .mindmap 格式的 JSON 文件
+- 错误处理：所有操作都有 try-catch，返回成功/失败状态
+- 自动加载：初始化时尝试从本地存储加载项目
+- 按钮集成：新建项目、打开文件、保存项目、导出HTML 按钮已绑定事件
+
 ## 进度追踪
 
 ### 已完成
@@ -92,6 +107,7 @@
 - [x] Task 3: NodeTree 树形结构组件
 - [x] Task 4: NodeEditor 节点编辑组件
 - [x] Task 6: AI调用封装模块
+- [x] Task 7: 存储管理模块
 
 ### 待完成
 - [ ] Task 5: Markdown 解析器
@@ -103,6 +119,12 @@
 - 开发服务器启动后，通过curl验证了ai.js和app.js文件可以正常访问
 - 语法检查通过，无JS错误
 - AI模块初始化测试代码在控制台输出正确信息
+
+### 2026-05-28: Storage模块测试
+- 语法检查通过，无JS错误
+- 开发服务器启动正常，页面可访问
+- Storage类方法逻辑正确，错误处理完善
+- 集成代码在app.js中正确导入和使用
 
 ## 会话记录
 
@@ -130,5 +152,12 @@
 - 支持 Mimo 和通义千问两种 AI 服务商
 - 提供 generateMindmap 方法生成思维导图
 - 修改 app.js 导入 AI 类并添加测试代码
+- 语法检查通过，开发服务器测试通过
+- 代码已提交
+
+### Session 5: 2026-05-28 (Task 7)
+- 创建存储管理模块 src/core/storage.js
+- 支持浏览器本地存储和文件导入导出
+- 修改 app.js 导入 Storage 类并添加按钮事件处理
 - 语法检查通过，开发服务器测试通过
 - 代码已提交

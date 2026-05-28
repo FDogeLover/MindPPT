@@ -130,7 +130,7 @@ export class AI {
       
       while (i < lines.length) {
         const line = lines[i];
-        const match = line.match(/^(\s*)-\s+(.+)$/);
+        const match = line.match(/^(\s*)[-*+]\s+(.+)$/);
         
         if (match) {
           const indent = match[1].length;
@@ -140,7 +140,7 @@ export class AI {
           let secondLine = '';
           if (i + 1 < lines.length) {
             const nextLine = lines[i + 1];
-            const nextMatch = nextLine.match(/^(\s*)-\s+(.+)$/);
+            const nextMatch = nextLine.match(/^(\s*)[-*+]\s+(.+)$/);
             const nextIndent = nextLine.match(/^(\s*)/)?.[1].length || 0;
             
             if (!nextMatch && nextIndent > indent) {
