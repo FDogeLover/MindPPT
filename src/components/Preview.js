@@ -1,3 +1,5 @@
+import { escapeHtml } from '../utils/escapeHtml.js';
+
 export class Preview {
   constructor(container, options = {}) {
     this.container = container;
@@ -25,10 +27,10 @@ export class Preview {
     return this.nodes.map(node => `
       <div class="preview-node ${node.id === this.activeNodeId ? 'active' : ''}" 
            data-id="${node.id}">
-        ${node.image ? `<img src="${node.image.src}" alt="${node.image.alt || ''}" class="node-image">` : ''}
+        ${node.image ? `<img src="${escapeHtml(node.image.src)}" alt="${escapeHtml(node.image.alt || '')}" class="node-image">` : ''}
         <div class="node-text">
-          ${node.subtitle ? `<div class="node-subtitle">${node.subtitle}</div>` : ''}
-          <div class="node-title">${node.title || '未命名'}</div>
+          ${node.subtitle ? `<div class="node-subtitle">${escapeHtml(node.subtitle)}</div>` : ''}
+          <div class="node-title">${escapeHtml(node.title || '未命名')}</div>
         </div>
       </div>
     `).join('');
@@ -48,6 +50,5 @@ export class Preview {
     this.nodes = nodes;
     this.activeNodeId = activeNodeId;
     this.render();
-    this.bindEvents();
   }
 }

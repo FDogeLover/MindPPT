@@ -1,3 +1,5 @@
+import { escapeHtml } from '../utils/escapeHtml.js';
+
 export class NodeTree {
   constructor(container, options = {}) {
     this.container = container;
@@ -30,8 +32,8 @@ export class NodeTree {
            style="padding-left: ${level * 20}px">
         <div class="node-content">
           <span class="node-toggle">${node.children?.length ? '▼' : ''}</span>
-          <span class="node-title">${node.title || '未命名'}</span>
-          <span class="node-subtitle">${node.subtitle || ''}</span>
+          <span class="node-title">${escapeHtml(node.title || '未命名')}</span>
+          <span class="node-subtitle">${escapeHtml(node.subtitle || '')}</span>
         </div>
         <div class="node-actions">
           <button class="btn-icon" data-action="add" data-id="${node.id}" title="添加子节点">+</button>

@@ -87,7 +87,8 @@ export class App {
 
     this.preview = new Preview(document.getElementById('preview'), {
       nodes: this.flattenNodes(this.state.projectData.nodes),
-      activeNodeId: this.state.activeNodeId
+      activeNodeId: this.state.activeNodeId,
+      onSelect: (id) => this.selectNode(id)
     });
   }
 
@@ -200,12 +201,24 @@ export class App {
       model: this.state.projectData.settings.aiModel
     });
 
+    const generateBtn = document.getElementById('generateBtn');
+    const originalText = generateBtn?.textContent;
+    if (generateBtn) {
+      generateBtn.textContent = '生成中...';
+      generateBtn.disabled = true;
+    }
+
     try {
       const nodes = await this.ai.generateMindmap(topic);
       this.state.projectData.nodes = this.buildTreeFromNodes(nodes);
       this.updateComponents();
     } catch (error) {
       alert('AI生成失败：' + error.message);
+    } finally {
+      if (generateBtn) {
+        generateBtn.textContent = originalText;
+        generateBtn.disabled = false;
+      }
     }
   }
 
@@ -217,7 +230,7 @@ export class App {
       const newNode = {
         id: node.id,
         title: node.title,
-        subtitle: '',
+        subtitle: node.subtitle || '',
         children: []
       };
 

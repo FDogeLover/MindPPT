@@ -1,3 +1,5 @@
+import { escapeHtml } from '../utils/escapeHtml.js';
+
 export class NodeEditor {
   constructor(container, options = {}) {
     this.container = container;
@@ -24,17 +26,17 @@ export class NodeEditor {
       <div class="node-editor-form">
         <div class="form-group">
           <label>副标题（小字）</label>
-          <input type="text" id="nodeSubtitle" value="${this.node.subtitle || ''}" placeholder="可选的副标题">
+          <input type="text" id="nodeSubtitle" value="${escapeHtml(this.node.subtitle || '')}" placeholder="可选的副标题">
         </div>
         <div class="form-group">
           <label>主标题</label>
-          <input type="text" id="nodeTitle" value="${this.node.title || ''}" placeholder="节点主标题">
+          <input type="text" id="nodeTitle" value="${escapeHtml(this.node.title || '')}" placeholder="节点主标题">
         </div>
         <div class="form-group">
           <label>图片</label>
           <div class="image-preview" id="imagePreview">
             ${this.node.image ? `
-              <img src="${this.node.image.src}" alt="${this.node.image.alt || ''}">
+              <img src="${escapeHtml(this.node.image.src)}" alt="${escapeHtml(this.node.image.alt || '')}">
               <button class="btn-remove-image" id="removeImage">×</button>
             ` : `
               <div class="image-placeholder">无图片</div>
