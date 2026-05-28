@@ -2,6 +2,7 @@ import { NodeTree } from './components/NodeTree.js';
 import { NodeEditor } from './components/NodeEditor.js';
 import { Preview } from './components/Preview.js';
 import { AI } from './core/ai.js';
+import { Storage } from './core/storage.js';
 
 export class App {
   constructor() {
@@ -20,6 +21,7 @@ export class App {
       ]
     };
     this.container = document.getElementById('app');
+    this.storage = new Storage();
   }
 
   init() {
@@ -27,6 +29,7 @@ export class App {
     this.setupNodeTree();
     this.setupNodeEditor();
     this.setupPreview();
+    this.setupStorage();
   }
 
   render() {
@@ -146,6 +149,41 @@ export class App {
     }
   }
 
+  setupStorage() {
+    const newProjectBtn = document.getElementById('newProject');
+    const openFileBtn = document.getElementById('openFile');
+    const saveProjectBtn = document.getElementById('saveProject');
+    const exportHtmlBtn = document.getElementById('exportHtml');
+
+    if (newProjectBtn) {
+      newProjectBtn.addEventListener('click', () => this.handleNewProject());
+    }
+    if (openFileBtn) {
+      openFileBtn.addEventListener('click', () => this.handleOpenFile());
+    }
+    if (saveProjectBtn) {
+      saveProjectBtn.addEventListener('click', () => this.handleSaveProject());
+    }
+    if (exportHtmlBtn) {
+      exportHtmlBtn.addEventListener('click', () => this.handleExportHtml());
+    }
+
+    // 尝试从本地存储加载项目
+    const savedProject = this.storage.loadProject();
+    if (savedProject) {
+      this.state.nodes = savedProject.nodes || this.state.nodes;
+      this.state.projectData = savedProject;
+      // 重新渲染节点树和预览
+      if (this.nodeTree) {
+        this.nodeTree.update(this.state.nodes, this.state.activeNodeId);
+      }
+      if (this.preview) {
+        const flatNodes = this.flattenNodes(this.state.nodes);
+        this.preview.update(flatNodes, this.state.activeNodeId);
+      }
+    }
+  }
+
   flattenNodes(nodes, result = []) {
     for (const node of nodes) {
       result.push({ id: node.id, title: node.title, subtitle: node.subtitle, image: node.image });
@@ -154,5 +192,81 @@ export class App {
       }
     }
     return result;
+  }
+
+  handleNewProject() {
+    if (confirm('确定要新建项目吗？当前未保存的更改将丢失。')) {
+      this.state.nodes = [
+        { id: '1', title: '根节点', subtitle: '主标题', children: [] }
+      ];
+      this.state.activeNodeId = null;
+      this.state.projectData = null;
+      this.storage.clearProject();
+      
+      if (this.nodeTree) {
+        this.nodeTree.update(this.state.nodes, this.state.activeNodeId);
+      }
+      if (this.nodeEditor) {
+        this.nodeEditor.update(null);
+      }
+      if (this.preview) {
+        const flatNodes = this.flattenNodes(this.state.nodes);
+        this.preview.update(flatNodes, this.state.activeNodeId);
+      }
+    }
+  }
+
+  async handleOpenFile() {
+    try {
+      const data = await this.storage.importFromFile();
+      this.state.nodes = data.nodes || this.state.nodes;
+      this.state.projectData = data;
+      this.state.activeNodeId = null;
+      
+      if (this.nodeTree) {
+        this.nodeTree.update(this.state.nodes, this.state.activeNodeId);
+      }
+      if (this.nodeEditor) {
+        this.nodeEditor.update(null);
+      }
+      if (this.preview) {
+        const flatNodes = this.flattenNodes(this.state.nodes);
+        this.preview.update(flatNodes, this.state.activeNodeId);
+      }
+      
+      console.log('项目已加载');
+    } catch (error) {
+      console.error('打开文件失败:', error);
+      alert('打开文件失败: ' + error.message);
+    }
+  }
+
+  handleSaveProject() {
+    const projectData = {
+      name: this.state.projectData?.name || 'mindmap',
+      nodes: this.state.nodes,
+      createdAt: this.state.projectData?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    if (this.storage.saveProject(projectData)) {
+      this.state.projectData = projectData;
+      console.log('项目已保存');
+      alert('项目已保存到本地存储');
+    } else {
+      alert('保存项目失败');
+    }
+  }
+
+  handleExportHtml() {
+    const projectData = {
+      name: this.state.projectData?.name || 'mindmap',
+      nodes: this.state.nodes,
+      createdAt: this.state.projectData?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    this.storage.exportToFile(projectData);
+    console.log('项目已导出');
   }
 }
