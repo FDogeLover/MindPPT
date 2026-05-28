@@ -184,7 +184,7 @@ export class App {
   updateComponents() {
     this.nodeTree.update(this.state.projectData.nodes, this.state.activeNodeId);
     this.nodeEditor.update(this.getActiveNode());
-    this.preview.update(this.flattenNodes(this.state.projectData.nodes), this.state.activeNodeId);
+    this.preview.update(this.state.projectData.nodes, this.state.activeNodeId);
   }
 
   async generateWithAI() {

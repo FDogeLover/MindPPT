@@ -124,9 +124,11 @@ body {
 }
 
 .node-editor {
-  height: 200px;
+  min-height: 200px;
+  max-height: 300px;
   padding: 16px;
   background: #fafafa;
+  overflow-y: auto;
 }
 
 .preview-container {
