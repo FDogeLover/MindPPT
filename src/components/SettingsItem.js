@@ -4,6 +4,7 @@ export class SettingsItem {
     this.value = value;
     this.onChange = onChange;
     this.element = null;
+    this.handlers = {};
   }
 
   render() {
@@ -49,10 +50,11 @@ export class SettingsItem {
       select.appendChild(opt);
     });
 
-    select.addEventListener('change', (e) => {
+    this.handlers.selectChange = (e) => {
       this.value = e.target.value;
       this.onChange(this.config.key, this.value);
-    });
+    };
+    select.addEventListener('change', this.handlers.selectChange);
 
     return select;
   }
@@ -72,19 +74,21 @@ export class SettingsItem {
     text.className = 'settings-item-color-text';
     text.placeholder = '#000000';
 
-    input.addEventListener('input', (e) => {
+    this.handlers.colorInput = (e) => {
       text.value = e.target.value;
       this.value = e.target.value;
       this.onChange(this.config.key, this.value);
-    });
+    };
+    input.addEventListener('input', this.handlers.colorInput);
 
-    text.addEventListener('change', (e) => {
+    this.handlers.colorText = (e) => {
       if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
         input.value = e.target.value;
         this.value = e.target.value;
         this.onChange(this.config.key, this.value);
       }
-    });
+    };
+    text.addEventListener('change', this.handlers.colorText);
 
     wrapper.appendChild(input);
     wrapper.appendChild(text);
@@ -107,12 +111,13 @@ export class SettingsItem {
     value.className = 'settings-item-slider-value';
     value.textContent = `${this.value}${this.config.unit || ''}`;
 
-    input.addEventListener('input', (e) => {
+    this.handlers.sliderInput = (e) => {
       const val = Number(e.target.value);
       value.textContent = `${val}${this.config.unit || ''}`;
       this.value = val;
       this.onChange(this.config.key, val);
-    });
+    };
+    input.addEventListener('input', this.handlers.sliderInput);
 
     wrapper.appendChild(input);
     wrapper.appendChild(value);
@@ -129,10 +134,11 @@ export class SettingsItem {
     input.checked = this.value || false;
     input.className = 'settings-item-checkbox-input';
 
-    input.addEventListener('change', (e) => {
+    this.handlers.checkboxChange = (e) => {
       this.value = e.target.checked;
       this.onChange(this.config.key, this.value);
-    });
+    };
+    input.addEventListener('change', this.handlers.checkboxChange);
 
     wrapper.appendChild(input);
 
@@ -141,13 +147,71 @@ export class SettingsItem {
 
   updateValue(value) {
     this.value = value;
-    const control = this.element?.querySelector('select, input');
-    if (control) {
-      if (control.type === 'checkbox') {
-        control.checked = value;
-      } else {
-        control.value = value;
-      }
+    if (!this.element) return;
+    
+    switch (this.config.type) {
+      case 'select':
+        const select = this.element.querySelector('select');
+        if (select) select.value = value;
+        break;
+      case 'color':
+        const colorInput = this.element.querySelector('input[type="color"]');
+        const colorText = this.element.querySelector('input[type="text"]');
+        if (colorInput) colorInput.value = value;
+        if (colorText) colorText.value = value;
+        break;
+      case 'slider':
+        const sliderInput = this.element.querySelector('input[type="range"]');
+        const sliderValue = this.element.querySelector('.settings-item-slider-value');
+        if (sliderInput) sliderInput.value = value;
+        if (sliderValue) sliderValue.textContent = `${value}${this.config.unit || ''}`;
+        break;
+      case 'checkbox':
+        const checkbox = this.element.querySelector('input[type="checkbox"]');
+        if (checkbox) checkbox.checked = value;
+        break;
     }
+  }
+
+  destroy() {
+    if (!this.element) return;
+    
+    switch (this.config.type) {
+      case 'select':
+        const select = this.element.querySelector('select');
+        if (select && this.handlers.selectChange) {
+          select.removeEventListener('change', this.handlers.selectChange);
+          this.handlers.selectChange = null;
+        }
+        break;
+      case 'color':
+        const colorInput = this.element.querySelector('input[type="color"]');
+        const colorText = this.element.querySelector('input[type="text"]');
+        if (colorInput && this.handlers.colorInput) {
+          colorInput.removeEventListener('input', this.handlers.colorInput);
+          this.handlers.colorInput = null;
+        }
+        if (colorText && this.handlers.colorText) {
+          colorText.removeEventListener('change', this.handlers.colorText);
+          this.handlers.colorText = null;
+        }
+        break;
+      case 'slider':
+        const sliderInput = this.element.querySelector('input[type="range"]');
+        if (sliderInput && this.handlers.sliderInput) {
+          sliderInput.removeEventListener('input', this.handlers.sliderInput);
+          this.handlers.sliderInput = null;
+        }
+        break;
+      case 'checkbox':
+        const checkbox = this.element.querySelector('input[type="checkbox"]');
+        if (checkbox && this.handlers.checkboxChange) {
+          checkbox.removeEventListener('change', this.handlers.checkboxChange);
+          this.handlers.checkboxChange = null;
+        }
+        break;
+    }
+    
+    this.element = null;
   }
 }
