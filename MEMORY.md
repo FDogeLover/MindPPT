@@ -11,6 +11,9 @@
 | 2026-05-28 | Task 4: NodeEditor 节点编辑组件 |
 | 2026-05-28 | Task 6: AI调用封装模块 |
 | 2026-05-28 | Task 7: 存储管理模块 |
+| 2026-05-29 | Task 6: 创建Settings CSS（代码质量修复） |
+| 2026-05-29 | Task 9: 测试设置面板 - 修复key path解析bug |
+| 2026-05-29 | 修复 Settings 深拷贝问题 - 防止 DEFAULT_SETTINGS 被污染 |
 
 ## 决策日志
 
@@ -48,6 +51,29 @@
 - **原因**: 需要支持项目保存、加载、导入导出，提供数据持久化能力
 - **方案**: 创建 src/core/storage.js，提供 saveProject、loadProject、clearProject、exportToFile、importFromFile 方法
 - **变更**: 新增 src/core/storage.js，修改 app.js 导入 Storage 类并添加按钮事件处理
+
+### 2026-05-29: Task 6 - Settings CSS 代码质量修复
+- **决策**: 移除未使用的CSS规则，提取硬编码值为CSS变量
+- **原因**: 
+  1. `.main-content.panel-open` 规则从未被JavaScript应用，属于死代码
+  2. 面板宽度 `300px` 在两处硬编码，违反DRY原则
+- **方案**: 
+  1. 删除未使用的 `.main-content.panel-open` 规则
+  2. 在 `:root` 中定义 `--settings-panel-width: 300px` 变量
+  3. 将 `.settings-panel` 的 `width` 改为使用该变量
+- **变更**: 修改 `src/styles/main.css` 和 `src/styles/settings.css`
+
+### 2026-05-29: Task 9 - 修复设置面板key path解析bug
+- **决策**: 统一config key为相对路径，由createGroupContent自动拼接group前缀
+- **原因**: 
+  1. PPT风格组的key是相对路径（如 `nodeStyle.borderRadius`），需要拼接 `pptStyle.` 前缀
+  2. 文字样式和AI组的key已经包含了完整路径（如 `textStyle.fontSize.title`）
+  3. 这种不一致导致文字样式组的slider显示 `undefinedpx`
+- **方案**: 
+  1. 修改 `settings-config.js`，统一所有config key为相对路径
+  2. 修改 `SettingsPanel.createGroupContent()`，自动拼接group key前缀
+  3. 修改回调中的key，也使用完整路径
+- **变更**: 修改 `src/config/settings-config.js` 和 `src/components/SettingsPanel.js`
 
 ## 技术发现
 
@@ -91,6 +117,19 @@
 - 自动加载：初始化时尝试从本地存储加载项目
 - 按钮集成：新建项目、打开文件、保存项目、导出HTML 按钮已绑定事件
 
+### Settings CSS 代码质量修复
+- 移除了未使用的CSS规则（`.main-content.panel-open`），该规则从未被JavaScript应用
+- 提取了重复的硬编码值为CSS变量（`--settings-panel-width`），便于统一维护
+- CSS变量定义在 `:root` 伪类中，确保全局可用
+- 使用 `var(--variable-name)` 引用变量，保持样式一致性
+
+### Settings 深拷贝问题
+- JavaScript 的 `{ ...obj }` 只做浅拷贝，嵌套对象仍是引用
+- `DEFAULT_SETTINGS` 包含嵌套对象（pptStyle.bgStyle, textStyle.fontSize 等）
+- 浅拷贝后修改嵌套属性会污染原始 DEFAULT_SETTINGS
+- 使用 `JSON.parse(JSON.stringify(obj))` 做深拷贝
+- SettingsPanel 的 tempSettings 需要独立副本，避免取消操作无法恢复
+
 ## 进度追踪
 
 ### 已完成
@@ -126,6 +165,26 @@
 - Storage类方法逻辑正确，错误处理完善
 - 集成代码在app.js中正确导入和使用
 
+### 2026-05-29: Settings CSS 代码质量修复
+- 使用 grep 搜索确认 `.main-content.panel-open` 未被JavaScript使用
+- 在 `:root` 中定义CSS变量，确保全局可用
+- 修改后语法检查通过，开发服务器正常运行
+- Git提交成功，提交信息清晰描述修复内容
+
+### 2026-05-29: 设置面板key path解析bug
+- 通过 scrapling_fetch 获取HTML验证slider值显示为 `undefinedpx`
+- 使用 grep 追踪 SettingsPanel.js 中 getNestedValue 调用链
+- 发现config key不一致：pptStyle组用相对路径，其他组用完整路径
+- 修复后重新获取HTML验证slider值正确显示（8px, 16px等）
+- 使用 browser session 验证修复
+
+### 2026-05-29: Settings 深拷贝问题修复
+- 浅拷贝 `{ ...obj }` 只复制顶层属性，嵌套对象仍是引用
+- `reset()`、`load()`、`getAll()`、`getDefaults()` 都需要深拷贝
+- 使用 `JSON.parse(JSON.stringify(obj))` 实现深拷贝
+- SettingsPanel 的 tempSettings 通过 getAll() 获取，修复后自动获得独立副本
+- `applyTheme()` 也修复了主题对象的浅拷贝问题
+
 ## 会话记录
 
 ### Session 1: 2026-05-28
@@ -160,4 +219,11 @@
 - 支持浏览器本地存储和文件导入导出
 - 修改 app.js 导入 Storage 类并添加按钮事件处理
 - 语法检查通过，开发服务器测试通过
+- 代码已提交
+
+### Session 6: 2026-05-29 (Task 6 代码质量修复)
+- 修复了 Settings CSS 的两个代码质量问题
+- 移除了未使用的 `.main-content.panel-open` 规则
+- 提取了硬编码的面板宽度为CSS变量
+- 语法检查通过，开发服务器正常运行
 - 代码已提交
