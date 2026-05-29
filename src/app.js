@@ -216,14 +216,20 @@ export class App {
     const topic = prompt('请输入思维导图主题：');
     if (!topic) return;
 
-    const apiKey = this.state.projectData.settings.apiKey || prompt('请输入API Key：');
+    // 从 Settings 实例读取 AI 配置，不再使用 state.projectData.settings
+    const apiKey = this.settings.get('ai.apiKey') || prompt('请输入API Key：');
     if (!apiKey) return;
 
-    this.state.projectData.settings.apiKey = apiKey;
+    // 如果用户输入了新的API密钥，保存到设置中
+    if (!this.settings.get('ai.apiKey')) {
+      this.settings.set('ai.apiKey', apiKey);
+      this.settings.save();
+    }
+
     this.ai = new AI({
-      provider: this.state.projectData.settings.aiProvider,
+      provider: this.settings.get('ai.provider'),
       apiKey: apiKey,
-      model: this.state.projectData.settings.aiModel
+      model: this.settings.get('ai.model')
     });
 
     const generateBtn = document.getElementById('generateBtn');
@@ -385,6 +391,9 @@ export class App {
   }
 
   applySettings(settings) {
+    // 注意：当前实现仅应用背景颜色作为占位符。
+    // 完整的设置应用（节点样式、线条样式、动画等）将在后续任务中实现。
+    // 设置面板用于配置，实际渲染应用是独立的关注点。
     const preview = document.querySelector('.preview-panel');
     if (preview) {
       preview.style.background = settings.pptStyle?.bgStyle?.color || '#fcfcf8';

@@ -251,6 +251,9 @@ export class SettingsPanel {
   }
 
   save() {
+    // 注意：这里直接修改 Settings 实例的内部 .settings 属性，
+    // 然后立即调用 save() 持久化。这种模式在当前实现中是安全的，
+    // 因为 Settings 类没有验证逻辑，且 save() 会触发 listeners。
     Object.assign(this.settings.settings, this.tempSettings);
     this.settings.save();
     this.hasChanges = false;
