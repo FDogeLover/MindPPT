@@ -1,3 +1,5 @@
+import { escapeHtml } from '../utils/escapeHtml.js';
+
 export class SettingsGroup {
   constructor(options = {}) {
     this.label = options.label || '';
@@ -6,26 +8,46 @@ export class SettingsGroup {
     this.content = options.content || '';
     this.onToggle = options.onToggle || (() => {});
     this.element = null;
+    this.headerClickHandler = null;
   }
 
   render() {
     this.element = document.createElement('div');
     this.element.className = `settings-group ${this.collapsed ? 'collapsed' : ''}`;
     
-    this.element.innerHTML = `
-      <div class="settings-group-header">
-        <span class="settings-group-icon">${this.icon}</span>
-        <span class="settings-group-label">${this.label}</span>
-        <span class="settings-group-arrow">${this.collapsed ? '▶' : '▼'}</span>
-      </div>
-      <div class="settings-group-content">
-        ${this.content}
-      </div>
-    `;
+    // Create header
+    const header = document.createElement('div');
+    header.className = 'settings-group-header';
     
-    this.element.querySelector('.settings-group-header').addEventListener('click', () => {
-      this.toggle();
-    });
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'settings-group-icon';
+    iconSpan.textContent = this.icon;
+    
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'settings-group-label';
+    labelSpan.textContent = this.label;
+    
+    const arrowSpan = document.createElement('span');
+    arrowSpan.className = 'settings-group-arrow';
+    arrowSpan.textContent = this.collapsed ? '▶' : '▼';
+    
+    header.appendChild(iconSpan);
+    header.appendChild(labelSpan);
+    header.appendChild(arrowSpan);
+    
+    // Create content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'settings-group-content';
+    // Note: content is expected to be trusted HTML from SettingsItem components
+    // Do not use with user-provided content without sanitization
+    contentDiv.innerHTML = this.content;
+    
+    this.element.appendChild(header);
+    this.element.appendChild(contentDiv);
+    
+    // Store handler reference for cleanup
+    this.headerClickHandler = () => this.toggle();
+    header.addEventListener('click', this.headerClickHandler);
     
     return this.element;
   }
@@ -41,6 +63,8 @@ export class SettingsGroup {
     this.content = content;
     const contentEl = this.element?.querySelector('.settings-group-content');
     if (contentEl) {
+      // Note: content is expected to be trusted HTML from SettingsItem components
+      // Do not use with user-provided content without sanitization
       contentEl.innerHTML = content;
     }
   }
@@ -51,5 +75,16 @@ export class SettingsGroup {
 
   expand() {
     if (this.collapsed) this.toggle();
+  }
+
+  destroy() {
+    if (this.element) {
+      const header = this.element.querySelector('.settings-group-header');
+      if (header && this.headerClickHandler) {
+        header.removeEventListener('click', this.headerClickHandler);
+        this.headerClickHandler = null;
+      }
+      this.element = null;
+    }
   }
 }
