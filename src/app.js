@@ -4,6 +4,8 @@ import { Preview } from './components/Preview.js';
 import { AI } from './core/ai.js';
 import { Storage } from './core/storage.js';
 import { Exporter } from './core/exporter.js';
+import { Settings } from './core/settings.js';
+import { SettingsPanel } from './components/SettingsPanel.js';
 
 export class App {
   constructor() {
@@ -24,6 +26,7 @@ export class App {
     this.storage = new Storage();
     this.ai = null;
     this.exporter = new Exporter();
+    this.settings = new Settings();
     this.container = document.getElementById('app');
   }
 
@@ -53,6 +56,7 @@ export class App {
           <button class="btn" id="openFile">打开文件</button>
           <button class="btn" id="saveProject">保存项目</button>
           <button class="btn btn-accent" id="exportMindmap">导出项目</button>
+          <button class="btn btn-icon" id="settingsBtn" title="设置">⚙️</button>
         </div>
       </header>
       <main class="main-content">
@@ -90,6 +94,13 @@ export class App {
       activeNodeId: this.state.activeNodeId,
       onSelect: (id) => this.selectNode(id)
     });
+
+    this.settingsPanel = new SettingsPanel(document.body, {
+      settings: this.settings,
+      onSave: (newSettings) => this.onSettingsSave(newSettings),
+      onCancel: () => this.onSettingsCancel(),
+      onPreview: (tempSettings) => this.onSettingsPreview(tempSettings)
+    });
   }
 
   bindEvents() {
@@ -98,6 +109,7 @@ export class App {
     document.getElementById('saveProject')?.addEventListener('click', () => this.saveProject());
     document.getElementById('exportMindmap')?.addEventListener('click', () => this.exportMindmap());
     document.getElementById('generateBtn')?.addEventListener('click', () => this.generateWithAI());
+    document.getElementById('settingsBtn')?.addEventListener('click', () => this.toggleSettings());
   }
 
   getActiveNode() {
@@ -350,6 +362,32 @@ export class App {
       input.click();
     } else if (type === 'ai') {
       alert('AI生成图片功能即将推出');
+    }
+  }
+
+  toggleSettings() {
+    this.settingsPanel.toggle();
+  }
+
+  onSettingsSave(newSettings) {
+    this.applySettings(newSettings);
+    this.updateComponents();
+  }
+
+  onSettingsCancel() {
+    this.applySettings(this.settings.getAll());
+    this.updateComponents();
+  }
+
+  onSettingsPreview(tempSettings) {
+    this.applySettings(tempSettings);
+    this.updateComponents();
+  }
+
+  applySettings(settings) {
+    const preview = document.querySelector('.preview-panel');
+    if (preview) {
+      preview.style.background = settings.pptStyle?.bgStyle?.color || '#fcfcf8';
     }
   }
 }
