@@ -185,6 +185,19 @@ export class App {
     this.nodeTree.update(this.state.projectData.nodes, this.state.activeNodeId);
     this.nodeEditor.update(this.getActiveNode());
     this.preview.update(this.state.projectData.nodes, this.state.activeNodeId);
+    
+    // 自动保存项目
+    this.autoSave();
+  }
+
+  autoSave() {
+    // 使用防抖，避免频繁保存
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer);
+    }
+    this.autoSaveTimer = setTimeout(() => {
+      this.storage.saveProject(this.state.projectData);
+    }, 500);
   }
 
   async generateWithAI() {
@@ -234,11 +247,15 @@ export class App {
         children: []
       };
 
+      // 找到正确的父节点
       while (stack.length > 1 && stack[stack.length - 1].level >= node.level) {
         stack.pop();
       }
 
+      // 将新节点添加到父节点的children中
       stack[stack.length - 1].children.push(newNode);
+      
+      // 将新节点压入栈中
       stack.push({ children: newNode.children, level: node.level });
     }
 

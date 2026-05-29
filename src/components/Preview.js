@@ -23,11 +23,6 @@ export class Preview {
         </div>
 
         <section class="floating-ui" aria-label="Presentation controls">
-          <div class="title-panel glass-panel">
-            <p class="eyebrow" id="deckSubtitle">Markdown Mindmap</p>
-            <h1 id="deckTitle">root</h1>
-          </div>
-
           <div class="controls glass-panel" aria-label="节点演示操作区">
             <button
               class="controls-toggle"
@@ -120,22 +115,26 @@ export class Preview {
   nodesToMarkdown(nodes, level = 0) {
     let markdown = '';
     const indent = '  '.repeat(level);
+    const childIndent = '  '.repeat(level + 1);
     
     for (const node of nodes) {
       const subtitle = node.subtitle || '';
       const title = node.title || '未命名';
       
+      // 生成节点行（使用title作为节点标签）
+      markdown += `${indent}- ${title}\n`;
+      
+      // 如果有副标题，生成副标题作为续行
       if (subtitle) {
-        markdown += `${indent}- ${subtitle}\n`;
-        markdown += `${indent}  ${title}\n`;
-      } else {
-        markdown += `${indent}- ${title}\n`;
+        markdown += `${childIndent}${subtitle}\n`;
       }
       
+      // 如果有图片，生成@image续行
       if (node.image) {
-        markdown += `${indent}  @image ${node.image.src}\n`;
+        markdown += `${childIndent}@image ${node.image.src}\n`;
       }
       
+      // 递归处理子节点
       if (node.children && node.children.length > 0) {
         markdown += this.nodesToMarkdown(node.children, level + 1);
       }

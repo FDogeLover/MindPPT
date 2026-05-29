@@ -8,6 +8,7 @@ export class NodeTree {
     this.onSelect = options.onSelect || (() => {});
     this.onAdd = options.onAdd || (() => {});
     this.onDelete = options.onDelete || (() => {});
+    this.bindEvents();
     this.render();
   }
 
@@ -21,19 +22,15 @@ export class NodeTree {
         ${this.renderNodes(this.nodes)}
       </div>
     `;
-    
-    this.bindEvents();
   }
 
   renderNodes(nodes, level = 0) {
     return nodes.map(node => `
-      <div class="tree-node ${node.id === this.activeNodeId ? 'active' : ''}" 
-           data-id="${node.id}" 
-           style="padding-left: ${level * 20}px">
+      <div class="tree-node level-${level} ${node.id === this.activeNodeId ? 'active' : ''}" 
+           data-id="${node.id}">
         <div class="node-content">
           <span class="node-toggle">${node.children?.length ? '▼' : ''}</span>
-          <span class="node-title">${escapeHtml(node.title || '未命名')}</span>
-          <span class="node-subtitle">${escapeHtml(node.subtitle || '')}</span>
+          <span class="node-title">${escapeHtml(node.subtitle || node.title || '未命名')}</span>
         </div>
         <div class="node-actions">
           <button class="btn-icon" data-action="add" data-id="${node.id}" title="添加子节点">+</button>

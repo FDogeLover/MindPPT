@@ -13,7 +13,9 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
   background: var(--bg-color);
   color: var(--text-color);
 }
@@ -41,7 +43,7 @@ body {
   padding: 12px 24px;
   background: white;
   border-bottom: 1px solid #eee;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .toolbar-left {
@@ -98,15 +100,18 @@ body {
 .main-content {
   display: flex;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
 .editor-panel {
   width: 400px;
+  height: 100%;
   border-right: 1px solid #eee;
   display: flex;
   flex-direction: column;
   background: white;
+  overflow: hidden;
 }
 
 .preview-panel {
@@ -118,14 +123,34 @@ body {
 
 .node-tree {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+  overflow-y: scroll;
   padding: 16px;
   border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+}
+
+.node-tree-header {
+  flex-shrink: 0;
+}
+
+.node-tree-list {
+  flex: 1;
+  min-height: 0;
+}
+
+.node-tree-header {
+  flex-shrink: 0;
+}
+
+.node-tree-list {
+  flex: 1;
+  min-height: 0;
 }
 
 .node-editor {
-  min-height: 200px;
-  max-height: 300px;
+  flex: 0 0 420px;
   padding: 16px;
   background: #fafafa;
   overflow-y: auto;
