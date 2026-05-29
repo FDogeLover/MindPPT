@@ -33,7 +33,8 @@ export class Settings {
     try {
       const data = localStorage.getItem(SETTINGS_KEY);
       if (data) {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+        const storedSettings = JSON.parse(data);
+        return this.deepMerge({ ...DEFAULT_SETTINGS }, storedSettings);
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -59,7 +60,12 @@ export class Settings {
   set(path, value) {
     const keys = path.split('.');
     const lastKey = keys.pop();
-    const target = keys.reduce((obj, key) => obj[key], this.settings);
+    const target = keys.reduce((obj, key) => {
+      if (obj[key] === undefined || obj[key] === null || typeof obj[key] !== 'object') {
+        obj[key] = {};
+      }
+      return obj[key];
+    }, this.settings);
     target[lastKey] = value;
   }
 
@@ -110,6 +116,20 @@ export class Settings {
 
   getAll() {
     return { ...this.settings };
+  }
+
+  deepMerge(target, source) {
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        if (!target[key] || typeof target[key] !== 'object') {
+          target[key] = {};
+        }
+        this.deepMerge(target[key], source[key]);
+      } else {
+        target[key] = source[key];
+      }
+    }
+    return target;
   }
 
   getDefaults() {
