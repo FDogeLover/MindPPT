@@ -107,37 +107,92 @@ export class SettingsPanel {
       customConfig.className = 'ai-custom-config';
       customConfig.style.display = provider === 'custom' ? 'block' : 'none';
       
-      customConfig.innerHTML = `
-        <div class="settings-item">
-          <label class="settings-item-label">API地址</label>
-          <input type="text" class="settings-item-input" id="aiEndpoint" 
-                 value="${this.tempSettings.ai?.customEndpoint || ''}" 
-                 placeholder="https://api.example.com/v1">
-        </div>
-        <div class="settings-item">
-          <label class="settings-item-label">请求格式</label>
-          <select class="settings-item-select" id="aiFormat">
-            ${API_FORMATS.map(f => `<option value="${f.value}">${f.label}</option>`).join('')}
-          </select>
-        </div>
-        <div class="settings-item">
-          <label class="settings-item-label">API Key</label>
-          <input type="password" class="settings-item-input" id="aiApiKey" 
-                 value="${this.tempSettings.ai?.apiKey || ''}" 
-                 placeholder="sk-...">
-        </div>
-        <div class="settings-item">
-          <label class="settings-item-label">模型名称</label>
-          <input type="text" class="settings-item-input" id="aiModel" 
-                 value="${this.tempSettings.ai?.model || ''}" 
-                 placeholder="gpt-3.5-turbo">
-        </div>
-        <div class="settings-item">
-          <label class="settings-item-label"></label>
-          <button class="btn btn-small" id="aiTestConnection">测试连接</button>
-          <span class="ai-test-result" id="aiTestResult"></span>
-        </div>
-      `;
+      // 创建API地址设置项
+      const endpointItem = document.createElement('div');
+      endpointItem.className = 'settings-item';
+      const endpointLabel = document.createElement('label');
+      endpointLabel.className = 'settings-item-label';
+      endpointLabel.textContent = 'API地址';
+      const endpointInput = document.createElement('input');
+      endpointInput.type = 'text';
+      endpointInput.className = 'settings-item-input';
+      endpointInput.id = 'aiEndpoint';
+      endpointInput.value = this.tempSettings.ai?.customEndpoint || '';
+      endpointInput.placeholder = 'https://api.example.com/v1';
+      endpointItem.appendChild(endpointLabel);
+      endpointItem.appendChild(endpointInput);
+      
+      // 创建请求格式设置项
+      const formatItem = document.createElement('div');
+      formatItem.className = 'settings-item';
+      const formatLabel = document.createElement('label');
+      formatLabel.className = 'settings-item-label';
+      formatLabel.textContent = '请求格式';
+      const formatSelect = document.createElement('select');
+      formatSelect.className = 'settings-item-select';
+      formatSelect.id = 'aiFormat';
+      API_FORMATS.forEach(f => {
+        const option = document.createElement('option');
+        option.value = f.value;
+        option.textContent = f.label;
+        formatSelect.appendChild(option);
+      });
+      formatItem.appendChild(formatLabel);
+      formatItem.appendChild(formatSelect);
+      
+      // 创建API Key设置项
+      const apiKeyItem = document.createElement('div');
+      apiKeyItem.className = 'settings-item';
+      const apiKeyLabel = document.createElement('label');
+      apiKeyLabel.className = 'settings-item-label';
+      apiKeyLabel.textContent = 'API Key';
+      const apiKeyInput = document.createElement('input');
+      apiKeyInput.type = 'password';
+      apiKeyInput.className = 'settings-item-input';
+      apiKeyInput.id = 'aiApiKey';
+      apiKeyInput.value = this.tempSettings.ai?.apiKey || '';
+      apiKeyInput.placeholder = 'sk-...';
+      apiKeyItem.appendChild(apiKeyLabel);
+      apiKeyItem.appendChild(apiKeyInput);
+      
+      // 创建模型名称设置项
+      const modelItem = document.createElement('div');
+      modelItem.className = 'settings-item';
+      const modelLabel = document.createElement('label');
+      modelLabel.className = 'settings-item-label';
+      modelLabel.textContent = '模型名称';
+      const modelInput = document.createElement('input');
+      modelInput.type = 'text';
+      modelInput.className = 'settings-item-input';
+      modelInput.id = 'aiModel';
+      modelInput.value = this.tempSettings.ai?.model || '';
+      modelInput.placeholder = 'gpt-3.5-turbo';
+      modelItem.appendChild(modelLabel);
+      modelItem.appendChild(modelInput);
+      
+      // 创建测试连接按钮项
+      const testButtonItem = document.createElement('div');
+      testButtonItem.className = 'settings-item';
+      const testButtonLabel = document.createElement('label');
+      testButtonLabel.className = 'settings-item-label';
+      testButtonLabel.textContent = '';
+      const testButton = document.createElement('button');
+      testButton.className = 'btn btn-small';
+      testButton.id = 'aiTestConnection';
+      testButton.textContent = '测试连接';
+      const testResult = document.createElement('span');
+      testResult.className = 'ai-test-result';
+      testResult.id = 'aiTestResult';
+      testButtonItem.appendChild(testButtonLabel);
+      testButtonItem.appendChild(testButton);
+      testButtonItem.appendChild(testResult);
+      
+      // 添加所有设置项到容器
+      customConfig.appendChild(endpointItem);
+      customConfig.appendChild(formatItem);
+      customConfig.appendChild(apiKeyItem);
+      customConfig.appendChild(modelItem);
+      customConfig.appendChild(testButtonItem);
       
       container.appendChild(customConfig);
       
@@ -214,12 +269,24 @@ export class SettingsPanel {
   }
 
   async testConnection() {
-    const endpoint = this.element.querySelector('#aiEndpoint')?.value;
-    const apiKey = this.element.querySelector('#aiApiKey')?.value;
-    const model = this.element.querySelector('#aiModel')?.value;
-    const format = this.element.querySelector('#aiFormat')?.value;
+    // 获取DOM元素并添加空值检查
+    const endpointEl = this.element.querySelector('#aiEndpoint');
+    const apiKeyEl = this.element.querySelector('#aiApiKey');
+    const modelEl = this.element.querySelector('#aiModel');
+    const formatEl = this.element.querySelector('#aiFormat');
     const resultEl = this.element.querySelector('#aiTestResult');
     const testBtn = this.element.querySelector('#aiTestConnection');
+    
+    // 检查所有必需的DOM元素是否存在
+    if (!endpointEl || !apiKeyEl || !modelEl || !formatEl || !resultEl || !testBtn) {
+      console.error('测试连接所需的DOM元素不存在');
+      return;
+    }
+    
+    const endpoint = endpointEl.value;
+    const apiKey = apiKeyEl.value;
+    const model = modelEl.value;
+    const format = formatEl.value;
     
     if (!endpoint || !apiKey || !model) {
       resultEl.textContent = '请填写所有字段';
@@ -231,6 +298,9 @@ export class SettingsPanel {
     testBtn.textContent = '测试中...';
     resultEl.textContent = '';
     
+    // 安全说明：API密钥直接发送到用户指定的端点是预期行为。
+    // 用户正在测试他们自己的API密钥与他们自己的端点。
+    // 密钥仅发送到用户配置的endpoint，不会存储或传输到其他地方。
     try {
       const body = this.buildTestBody(format, model);
       const response = await fetch(`${endpoint}/chat/completions`, {
