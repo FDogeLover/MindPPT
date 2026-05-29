@@ -1,5 +1,3 @@
-import { escapeHtml } from '../utils/escapeHtml.js';
-
 export class SettingsGroup {
   constructor(options = {}) {
     this.label = options.label || '';
