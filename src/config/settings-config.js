@@ -74,13 +74,13 @@ export const SETTINGS_CONFIG = [
     label: '文字样式',
     icon: '✏️',
     items: [
-      { key: 'textStyle.fontFamily', label: '字体', type: 'select', options: FONT_FAMILIES },
-      { key: 'textStyle.fontSize.title', label: '标题字号', type: 'slider', min: 12, max: 32, unit: 'px' },
-      { key: 'textStyle.fontSize.subtitle', label: '副标题字号', type: 'slider', min: 10, max: 24, unit: 'px' },
-      { key: 'textStyle.fontSize.desc', label: '描述字号', type: 'slider', min: 8, max: 20, unit: 'px' },
-      { key: 'textStyle.fontWeight', label: '字重', type: 'select', options: FONT_WEIGHTS },
-      { key: 'textStyle.color', label: '文字颜色', type: 'color' },
-      { key: 'textStyle.align', label: '对齐方式', type: 'select', options: TEXT_ALIGNMENTS }
+      { key: 'fontFamily', label: '字体', type: 'select', options: FONT_FAMILIES },
+      { key: 'fontSize.title', label: '标题字号', type: 'slider', min: 12, max: 32, unit: 'px' },
+      { key: 'fontSize.subtitle', label: '副标题字号', type: 'slider', min: 10, max: 24, unit: 'px' },
+      { key: 'fontSize.desc', label: '描述字号', type: 'slider', min: 8, max: 20, unit: 'px' },
+      { key: 'fontWeight', label: '字重', type: 'select', options: FONT_WEIGHTS },
+      { key: 'color', label: '文字颜色', type: 'color' },
+      { key: 'align', label: '对齐方式', type: 'select', options: TEXT_ALIGNMENTS }
     ]
   },
   {
@@ -88,7 +88,7 @@ export const SETTINGS_CONFIG = [
     label: 'AI设置',
     icon: '🤖',
     items: [
-      { key: 'ai.provider', label: '服务商', type: 'select', options: AI_PROVIDERS }
+      { key: 'provider', label: '服务商', type: 'select', options: AI_PROVIDERS }
     ]
   }
 ];

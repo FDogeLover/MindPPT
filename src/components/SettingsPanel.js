@@ -50,7 +50,7 @@ export class SettingsPanel {
     this.groups = [];
     
     SETTINGS_CONFIG.forEach(config => {
-      const content = this.createGroupContent(config);
+      const content = this.createGroupContent(config.group, config);
       const group = new SettingsGroup({
         label: config.label,
         icon: config.icon,
@@ -72,13 +72,15 @@ export class SettingsPanel {
     });
   }
 
-  createGroupContent(config) {
+  createGroupContent(groupKey, config) {
     const items = [];
     
     config.items.forEach(itemConfig => {
-      const value = this.getNestedValue(this.tempSettings, itemConfig.key);
+      const fullKey = groupKey ? `${groupKey}.${itemConfig.key}` : itemConfig.key;
+      const value = this.getNestedValue(this.tempSettings, fullKey);
       const item = new SettingsItem(itemConfig, value, (key, val) => {
-        this.setNestedValue(this.tempSettings, key, val);
+        const fullChangeKey = groupKey ? `${groupKey}.${key}` : key;
+        this.setNestedValue(this.tempSettings, fullChangeKey, val);
         this.hasChanges = true;
         this.onPreview(this.tempSettings);
       });
