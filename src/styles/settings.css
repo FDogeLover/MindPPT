@@ -3,7 +3,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 300px;
+  width: var(--settings-panel-width);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
@@ -16,11 +16,6 @@
 
 .settings-panel.open {
   transform: translateX(0);
-}
-
-.main-content.panel-open {
-  margin-left: 300px;
-  transition: margin-left 0.3s ease;
 }
 
 .settings-header {
