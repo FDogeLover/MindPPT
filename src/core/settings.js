@@ -1,5 +1,9 @@
 const SETTINGS_KEY = 'mindmap-ppt-settings';
 
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 const DEFAULT_SETTINGS = {
   pptStyle: {
     colorScheme: 'default',
@@ -34,12 +38,12 @@ export class Settings {
       const data = localStorage.getItem(SETTINGS_KEY);
       if (data) {
         const storedSettings = JSON.parse(data);
-        return this.deepMerge({ ...DEFAULT_SETTINGS }, storedSettings);
+        return this.deepMerge(deepClone(DEFAULT_SETTINGS), storedSettings);
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
-    return { ...DEFAULT_SETTINGS };
+    return deepClone(DEFAULT_SETTINGS);
   }
 
   save() {
@@ -70,7 +74,7 @@ export class Settings {
   }
 
   reset() {
-    this.settings = { ...DEFAULT_SETTINGS };
+    this.settings = deepClone(DEFAULT_SETTINGS);
     this.save();
   }
 
@@ -101,7 +105,7 @@ export class Settings {
     };
     
     if (themes[themeName]) {
-      this.settings.pptStyle = { ...themes[themeName] };
+      this.settings.pptStyle = deepClone(themes[themeName]);
       this.save();
     }
   }
@@ -115,7 +119,7 @@ export class Settings {
   }
 
   getAll() {
-    return { ...this.settings };
+    return deepClone(this.settings);
   }
 
   deepMerge(target, source) {
@@ -133,6 +137,6 @@ export class Settings {
   }
 
   getDefaults() {
-    return { ...DEFAULT_SETTINGS };
+    return deepClone(DEFAULT_SETTINGS);
   }
 }
