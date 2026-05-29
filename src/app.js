@@ -43,6 +43,9 @@ export class App {
     this.render();
     this.initComponents();
     this.bindEvents();
+    
+    // 页面初始化时应用保存的设置
+    this.applySettings(this.settings.getAll());
   }
 
   render() {
@@ -378,25 +381,154 @@ export class App {
   onSettingsSave(newSettings) {
     this.applySettings(newSettings);
     this.updateComponents();
+    // 强制 MindmapRenderer 重新渲染以应用新样式
+    if (this.preview && this.preview.renderer) {
+      this.preview.renderer.render();
+    }
   }
 
   onSettingsCancel() {
     this.applySettings(this.settings.getAll());
     this.updateComponents();
+    // 强制 MindmapRenderer 重新渲染以应用新样式
+    if (this.preview && this.preview.renderer) {
+      this.preview.renderer.render();
+    }
   }
 
   onSettingsPreview(tempSettings) {
     this.applySettings(tempSettings);
-    this.updateComponents();
+    // 强制 MindmapRenderer 重新渲染以应用新样式
+    if (this.preview && this.preview.renderer) {
+      this.preview.renderer.render();
+    }
   }
 
   applySettings(settings) {
-    // 注意：当前实现仅应用背景颜色作为占位符。
-    // 完整的设置应用（节点样式、线条样式、动画等）将在后续任务中实现。
-    // 设置面板用于配置，实际渲染应用是独立的关注点。
+    const root = document.documentElement;
+    
+    // 应用配色方案
+    const colorSchemes = {
+      default: { 
+        primary: '#183a4a', 
+        accent: '#d8894f', 
+        bg: '#fcfcf8',
+        pathNodeBg: '#fffdf8',
+        completeNodeBg: '#eef7f3',
+        activeNodeBg: '#183a4a',
+        activeNodeBorder: '#d8894f',
+        activeNodeText: '#ffffff'
+      },
+      business: { 
+        primary: '#2c5282', 
+        accent: '#3182ce', 
+        bg: '#f5f7fa',
+        pathNodeBg: '#ebf8ff',
+        completeNodeBg: '#e6fffa',
+        activeNodeBg: '#2c5282',
+        activeNodeBorder: '#3182ce',
+        activeNodeText: '#ffffff'
+      },
+      minimal: { 
+        primary: '#000000', 
+        accent: '#666666', 
+        bg: '#ffffff',
+        pathNodeBg: '#f5f5f5',
+        completeNodeBg: '#eeeeee',
+        activeNodeBg: '#000000',
+        activeNodeBorder: '#333333',
+        activeNodeText: '#ffffff'
+      },
+      vibrant: { 
+        primary: '#d8894f', 
+        accent: '#e53e3e', 
+        bg: '#fff8f0',
+        pathNodeBg: '#fff5eb',
+        completeNodeBg: '#fed7d7',
+        activeNodeBg: '#d8894f',
+        activeNodeBorder: '#e53e3e',
+        activeNodeText: '#ffffff'
+      }
+    };
+    
+    const scheme = settings.pptStyle?.colorScheme || 'default';
+    const colors = colorSchemes[scheme] || colorSchemes.default;
+    root.style.setProperty('--primary-color', colors.primary);
+    root.style.setProperty('--accent-color', colors.accent);
+    root.style.setProperty('--path-node-bg', colors.pathNodeBg);
+    root.style.setProperty('--complete-node-bg', colors.completeNodeBg);
+    root.style.setProperty('--active-node-bg', colors.activeNodeBg);
+    root.style.setProperty('--active-node-border', colors.activeNodeBorder);
+    
+    // 应用背景
     const preview = document.querySelector('.preview-panel');
     if (preview) {
-      preview.style.background = settings.pptStyle?.bgStyle?.color || '#fcfcf8';
+      const bgColor = settings.pptStyle?.bgStyle?.color || colors.bg;
+      const bgType = settings.pptStyle?.bgStyle?.type || 'solid';
+      
+      if (bgType === 'gradient') {
+        preview.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${this.lightenColor(bgColor, 20)} 100%)`;
+      } else {
+        preview.style.background = bgColor;
+      }
     }
+    
+    // 应用节点样式
+    if (settings.pptStyle?.nodeStyle) {
+      const { borderRadius, shadow, bgColor, borderColor, unselectedBg, selectedBg } = settings.pptStyle.nodeStyle;
+      root.style.setProperty('--node-border-radius', `${borderRadius}px`);
+      root.style.setProperty('--node-shadow', shadow ? 'drop-shadow(0 10px 18px rgb(24 38 44 / 0.1))' : 'none');
+      root.style.setProperty('--node-bg-color', bgColor || '#ffffff');
+      root.style.setProperty('--node-border-color', borderColor || '#eee');
+      
+      // 应用自定义节点背景（如果设置了自己的颜色，则覆盖配色方案）
+      if (unselectedBg && unselectedBg !== '#ffffff') {
+        root.style.setProperty('--path-node-bg', unselectedBg);
+        root.style.setProperty('--complete-node-bg', unselectedBg);
+      }
+      if (selectedBg && selectedBg !== '#183a4a') {
+        root.style.setProperty('--active-node-bg', selectedBg);
+      }
+    }
+    
+    // 应用连线样式
+    if (settings.pptStyle?.lineStyle) {
+      const { color, width, type } = settings.pptStyle.lineStyle;
+      root.style.setProperty('--line-color', color || '#999999');
+      root.style.setProperty('--line-width', `${width}px`);
+      root.style.setProperty('--line-type', type === 'straight' ? 'straight' : 'curve');
+    }
+    
+    // 应用动画样式
+    if (settings.pptStyle?.animation) {
+      const { type, duration } = settings.pptStyle.animation;
+      root.style.setProperty('--animation-duration', `${duration}ms`);
+      root.style.setProperty('--animation-type', type);
+    }
+    
+    // 应用文字样式
+    if (settings.textStyle) {
+      const { fontFamily, fontSize, fontWeight, color, align } = settings.textStyle;
+      root.style.setProperty('--text-font-family', fontFamily);
+      root.style.setProperty('--text-font-size-title', `${fontSize?.title || 16}px`);
+      root.style.setProperty('--text-font-size-subtitle', `${fontSize?.subtitle || 14}px`);
+      root.style.setProperty('--text-font-weight', fontWeight);
+      
+      // 兼容 color 为字符串或对象两种格式
+      const titleColor = typeof color === 'object' ? color?.title : color;
+      const subtitleColor = typeof color === 'object' ? color?.subtitle : color;
+      root.style.setProperty('--node-text-color', titleColor || '#172033');
+      root.style.setProperty('--node-text-color-subtitle', subtitleColor || '#6b745d');
+      root.style.setProperty('--text-align', align);
+    }
+  }
+  
+  lightenColor(hex, percent) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = Math.min(255, (num >> 16) + amt);
+    const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+    const B = Math.min(255, (num & 0x0000FF) + amt);
+    return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
   }
 }

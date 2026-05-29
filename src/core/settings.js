@@ -8,7 +8,14 @@ const DEFAULT_SETTINGS = {
   pptStyle: {
     colorScheme: 'default',
     bgStyle: { type: 'solid', color: '#fcfcf8' },
-    nodeStyle: { borderRadius: 8, shadow: true, bgColor: '#ffffff', borderColor: '#eee' },
+    nodeStyle: { 
+      borderRadius: 8, 
+      shadow: true, 
+      bgColor: '#ffffff', 
+      borderColor: '#eee',
+      unselectedBg: '#ffffff',
+      selectedBg: '#183a4a'
+    },
     lineStyle: { type: 'curve', color: '#999999', width: 2 },
     animation: { type: 'fade', duration: 300 }
   },
@@ -16,7 +23,7 @@ const DEFAULT_SETTINGS = {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif',
     fontSize: { title: 16, subtitle: 14, desc: 12 },
     fontWeight: 'normal',
-    color: '#172033',
+    color: { title: '#172033', subtitle: '#6b745d' },
     align: 'left'
   },
   ai: {
@@ -31,6 +38,17 @@ export class Settings {
   constructor() {
     this.settings = this.load();
     this.listeners = [];
+    this.migrateData();
+  }
+
+  migrateData() {
+    if (this.settings.textStyle && typeof this.settings.textStyle.color === 'string') {
+      this.settings.textStyle.color = {
+        title: this.settings.textStyle.color,
+        subtitle: this.settings.textStyle.color
+      };
+      this.save();
+    }
   }
 
   load() {
@@ -38,6 +56,13 @@ export class Settings {
       const data = localStorage.getItem(SETTINGS_KEY);
       if (data) {
         const storedSettings = JSON.parse(data);
+        // 数据迁移：旧版 color 是字符串，新版是 { title, subtitle } 对象
+        if (storedSettings.textStyle && typeof storedSettings.textStyle.color === 'string') {
+          storedSettings.textStyle.color = {
+            title: storedSettings.textStyle.color,
+            subtitle: storedSettings.textStyle.color
+          };
+        }
         return this.deepMerge(deepClone(DEFAULT_SETTINGS), storedSettings);
       }
     } catch (error) {

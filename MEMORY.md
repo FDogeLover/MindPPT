@@ -14,6 +14,8 @@
 | 2026-05-29 | Task 6: 创建Settings CSS（代码质量修复） |
 | 2026-05-29 | Task 9: 测试设置面板 - 修复key path解析bug |
 | 2026-05-29 | 修复 Settings 深拷贝问题 - 防止 DEFAULT_SETTINGS 被污染 |
+| 2026-05-29 | 项目探索 - 全面了解项目架构和功能 |
+| 2026-05-29 | 修复文字样式颜色设置不生效 - 选中节点使用错误CSS变量 |
 
 ## 决策日志
 
@@ -117,11 +119,30 @@
 - 自动加载：初始化时尝试从本地存储加载项目
 - 按钮集成：新建项目、打开文件、保存项目、导出HTML 按钮已绑定事件
 
+### Markdown解析器特点
+- 实现在 `src/core/MindmapRenderer.js` 的 `parseMarkdownTree` 方法中
+- 支持解析 `- 副标题` + 缩进`主标题` 的两行标签格式
+- 支持 `@image` 元数据行解析图片路径
+- 使用栈结构处理嵌套层级，支持任意深度
+- 生成带id、label、children、depth等属性的节点树
+
 ### Settings CSS 代码质量修复
 - 移除了未使用的CSS规则（`.main-content.panel-open`），该规则从未被JavaScript应用
 - 提取了重复的硬编码值为CSS变量（`--settings-panel-width`），便于统一维护
 - CSS变量定义在 `:root` 伪类中，确保全局可用
 - 使用 `var(--variable-name)` 引用变量，保持样式一致性
+
+### 2026-05-29: localStorage 数据格式不兼容导致颜色设置报错
+- 错误：`Cannot create property 'title' on string '#183533'`
+- 根本原因：旧版代码将 `textStyle.color` 存为字符串，新版期望 `{ title, subtitle }` 对象。`deepMerge` 用字符串覆盖对象，`setNestedValue` 在字符串上创建属性失败
+- 修复：`settings.js` 添加 `migrateData()` 和 `load()` 中的格式兼容转换
+- 教训：localStorage 数据格式变更时必须做向前兼容迁移
+
+### 2026-05-29: 节点文字颜色变量隔离
+- 问题：`applySettings` 直接设置 `--text-color`，该变量被 `main.css` 中的 `body`、`.btn` 等 UI 元素共用，导致文字样式颜色设置影响了整个界面（按钮、设置标签等）
+- 修复：将节点文字颜色拆分为独立变量
+  - `--text-color` / `--text-color-subtitle` → 固定值，仅用于 UI 元素（`main.css :root`）
+  - `--node-text-color` / `--node-text-color-subtitle` → 动态值，由文字样式设置控制（`app.js` + `presentation.css`）
 
 ### Settings 深拷贝问题
 - JavaScript 的 `{ ...obj }` 只做浅拷贝，嵌套对象仍是引用
@@ -149,7 +170,6 @@
 - [x] Task 7: 存储管理模块
 
 ### 待完成
-- [ ] Task 5: Markdown 解析器
 - [ ] 添加示例图片资源到 project/assets/
 
 ## 调试经验
@@ -227,3 +247,10 @@
 - 提取了硬编码的面板宽度为CSS变量
 - 语法检查通过，开发服务器正常运行
 - 代码已提交
+
+### Session 7: 2026-05-29 (项目探索 + 颜色设置修复 x3)
+- 全面探索项目结构和功能
+- 修复 1：选中节点使用错误 CSS 变量（`--active-node-text` → `--text-color`）
+- 修复 2：localStorage 数据格式不兼容（字符串 vs 对象 color）导致 `setNestedValue` 报错
+- 修复 3：节点文字颜色变量隔离（`--text-color` → `--node-text-color`），防止影响 UI 元素
+- 验证开发服务器正常运行

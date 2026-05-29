@@ -4,7 +4,8 @@
   --node-image-expanded-width: 437px;
   --node-image-expanded-height: 600px;
   --active-node-scale: 1.5;
-  color: #172033;
+  --node-text-color: #172033;
+  --node-text-color-subtitle: #6b745d;
   background: #fcfcf8;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -664,11 +665,11 @@ h1 {
   opacity: 1;
   transform-origin: center;
   cursor: pointer;
-  filter: drop-shadow(0 10px 18px rgb(24 38 44 / 0.1));
+  filter: var(--node-shadow, drop-shadow(0 10px 18px rgb(24 38 44 / 0.1)));
   transition:
-    width 860ms cubic-bezier(0.22, 1, 0.36, 1),
-    height 860ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 820ms cubic-bezier(0.22, 1, 0.36, 1),
+    width var(--animation-duration, 860ms) cubic-bezier(0.22, 1, 0.36, 1),
+    height var(--animation-duration, 860ms) cubic-bezier(0.22, 1, 0.36, 1),
+    transform var(--animation-duration, 820ms) cubic-bezier(0.22, 1, 0.36, 1),
     opacity 420ms ease;
 }
 
@@ -706,19 +707,22 @@ h1 {
   min-width: 146px;
   min-height: 57px;
   padding: 10px 23px 13px;
-  border: 2px solid rgba(26, 42, 49, 0.18);
-  border-radius: 8px;
-  color: #172033;
-  background: #ffffff;
+  border: 2px solid var(--node-border-color, rgba(26, 42, 49, 0.18));
+  border-radius: var(--node-border-radius, 8px);
+  color: var(--node-text-color, #172033);
+  background: var(--node-bg-color, #ffffff);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  font-family: var(--text-font-family, inherit);
+  font-size: var(--text-font-size-title, 16px);
+  font-weight: var(--text-font-weight, normal);
+  text-align: var(--text-align, center);
   line-height: 1.25;
-  text-align: center;
   white-space: nowrap;
   transform-origin: center;
   transform: scale(1);
   opacity: 1;
   transition:
-    transform 920ms cubic-bezier(0.18, 1.08, 0.32, 1),
+    transform var(--animation-duration, 920ms) cubic-bezier(0.18, 1.08, 0.32, 1),
     opacity 480ms ease,
     background-color 620ms ease,
     border-color 620ms ease,
@@ -728,8 +732,8 @@ h1 {
 }
 
 .node-subtitle {
-  color: #6b745d;
-  font-size: 14px;
+  color: var(--node-text-color-subtitle, #6b745d);
+  font-size: var(--text-font-size-subtitle, 14px);
   font-weight: 850;
   line-height: 1.1;
 }
@@ -739,8 +743,8 @@ h1 {
 }
 
 .node-title {
-  color: inherit;
-  font-size: 21px;
+  color: var(--node-text-color, #172033);
+  font-size: var(--text-font-size-title, 21px);
   font-weight: 800;
   line-height: 1.25;
 }
@@ -879,32 +883,36 @@ h1 {
 
 .mind-node.path-node .node-content {
   border-color: rgba(38, 77, 92, 0.34);
-  background: #fffdf8;
+  background: var(--path-node-bg, #fffdf8);
 }
 
 .mind-node.complete-node .node-content {
   border-color: rgba(37, 126, 103, 0.35);
-  background: #eef7f3;
+  background: var(--complete-node-bg, #eef7f3);
 }
 
 .mind-node.active .node-content {
-  border-color: #d8894f;
+  border-color: var(--active-node-border, #d8894f);
   border-width: 3px;
-  color: #ffffff;
-  background: #183a4a;
+  color: var(--node-text-color, #ffffff);
+  background: var(--active-node-bg, #183a4a);
   box-shadow:
     0 0 14px rgba(216, 137, 79, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+.mind-node.active .node-title {
+  color: var(--node-text-color, #ffffff);
+}
+
 .mind-node.active .node-subtitle {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--node-text-color-subtitle, rgba(255, 255, 255, 0.72));
 }
 
 .mind-link {
   fill: none;
-  stroke: rgba(42, 55, 68, 0.3);
-  stroke-width: 3;
+  stroke: var(--line-color, rgba(42, 55, 68, 0.3));
+  stroke-width: var(--line-width, 3);
   stroke-linecap: round;
   opacity: 1;
   transition:

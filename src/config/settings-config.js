@@ -59,7 +59,8 @@ export const SETTINGS_CONFIG = [
     items: [
       { key: 'colorScheme', label: '配色方案', type: 'select', options: COLOR_SCHEMES },
       { key: 'bgStyle.type', label: '背景类型', type: 'select', options: BG_TYPES },
-      { key: 'bgStyle.color', label: '背景颜色', type: 'color' },
+      { key: 'nodeStyle.unselectedBg', label: '未选中节点背景', type: 'color' },
+      { key: 'nodeStyle.selectedBg', label: '选中节点背景', type: 'color' },
       { key: 'nodeStyle.borderRadius', label: '节点圆角', type: 'slider', min: 0, max: 24, unit: 'px' },
       { key: 'nodeStyle.shadow', label: '节点阴影', type: 'checkbox' },
       { key: 'lineStyle.type', label: '连线样式', type: 'select', options: LINE_TYPES },
@@ -79,7 +80,8 @@ export const SETTINGS_CONFIG = [
       { key: 'fontSize.subtitle', label: '副标题字号', type: 'slider', min: 10, max: 24, unit: 'px' },
       { key: 'fontSize.desc', label: '描述字号', type: 'slider', min: 8, max: 20, unit: 'px' },
       { key: 'fontWeight', label: '字重', type: 'select', options: FONT_WEIGHTS },
-      { key: 'color', label: '文字颜色', type: 'color' },
+      { key: 'color.title', label: '标题颜色', type: 'color' },
+      { key: 'color.subtitle', label: '副标题颜色', type: 'color' },
       { key: 'align', label: '对齐方式', type: 'select', options: TEXT_ALIGNMENTS }
     ]
   },

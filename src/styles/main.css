@@ -2,9 +2,10 @@
   --primary-color: #183a4a;
   --accent-color: #d8894f;
   --bg-color: #fcfcf8;
-  --text-color: #172033;
   --border-radius: 8px;
   --settings-panel-width: 300px;
+  --text-color: #172033;
+  --text-color-subtitle: #6b745d;
 }
 
 * {
