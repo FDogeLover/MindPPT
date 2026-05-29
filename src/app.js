@@ -52,7 +52,7 @@ export class App {
           <button class="btn btn-primary" id="newProject">新建项目</button>
           <button class="btn" id="openFile">打开文件</button>
           <button class="btn" id="saveProject">保存项目</button>
-          <button class="btn btn-accent" id="exportHtml">导出HTML</button>
+          <button class="btn btn-accent" id="exportMindmap">导出项目</button>
         </div>
       </header>
       <main class="main-content">
@@ -96,7 +96,7 @@ export class App {
     document.getElementById('newProject')?.addEventListener('click', () => this.newProject());
     document.getElementById('openFile')?.addEventListener('click', () => this.openFile());
     document.getElementById('saveProject')?.addEventListener('click', () => this.saveProject());
-    document.getElementById('exportHtml')?.addEventListener('click', () => this.exportHtml());
+    document.getElementById('exportMindmap')?.addEventListener('click', () => this.exportMindmap());
     document.getElementById('generateBtn')?.addEventListener('click', () => this.generateWithAI());
   }
 
@@ -294,8 +294,8 @@ export class App {
     }
   }
 
-  exportHtml() {
-    this.exporter.exportToHtml(this.state.projectData);
+  exportMindmap() {
+    this.storage.exportToFile(this.state.projectData);
   }
 
   nodesToMarkdown(nodes, level = 0) {

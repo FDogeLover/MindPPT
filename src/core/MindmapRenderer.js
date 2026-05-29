@@ -1,6 +1,7 @@
 export class MindmapRenderer {
-  constructor(container) {
+  constructor(container, options = {}) {
     this.container = container;
+    this.onNodeClick = options.onNodeClick || (() => {});
     this.mindmap = null;
     this.mapLayer = null;
     this.linkLayer = null;
@@ -813,11 +814,15 @@ export class MindmapRenderer {
     group.classList.add("mind-node", "entering");
     group.setAttribute("role", "button");
     group.setAttribute("tabindex", "0");
-    group.addEventListener("click", () => this.focusCameraOnNode(node.id));
+    group.addEventListener("click", () => {
+      this.focusCameraOnNode(node.id);
+      this.onNodeClick(node.id);
+    });
     group.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         this.focusCameraOnNode(node.id);
+        this.onNodeClick(node.id);
       }
     });
 
@@ -837,7 +842,9 @@ export class MindmapRenderer {
       return;
     }
 
-    this.cameraTargetIndex = node.preorderIndex === this.activeIndex ? null : node.preorderIndex;
+    // 更新activeIndex到选中的节点
+    this.activeIndex = node.preorderIndex;
+    this.cameraTargetIndex = null;
     this.render();
   }
 

@@ -5,6 +5,7 @@ export class Preview {
   constructor(container, options = {}) {
     this.container = container;
     this.nodes = options.nodes || [];
+    this.flatNodes = []; // 扁平化的节点列表，按前序遍历顺序
     this.activeNodeId = options.activeNodeId || null;
     this.onSelect = options.onSelect || (() => {});
     this.renderer = null;
@@ -93,8 +94,29 @@ export class Preview {
   }
 
   initRenderer() {
-    this.renderer = new MindmapRenderer(this.container);
+    this.renderer = new MindmapRenderer(this.container, {
+      onNodeClick: (nodeId) => this.handleNodeClick(nodeId)
+    });
     this.renderer.init();
+  }
+
+  handleNodeClick(nodeId) {
+    // MindmapRenderer使用自己的nodeId格式（node-0, node-1等）
+    // 使用扁平化的节点列表来映射
+    const nodeIndex = parseInt(nodeId.replace('node-', ''), 10);
+    if (!isNaN(nodeIndex) && nodeIndex < this.flatNodes.length) {
+      this.onSelect(this.flatNodes[nodeIndex].id);
+    }
+  }
+
+  flattenNodes(nodes, result = []) {
+    for (const node of nodes) {
+      result.push(node);
+      if (node.children && node.children.length > 0) {
+        this.flattenNodes(node.children, result);
+      }
+    }
+    return result;
   }
 
   loadMarkdown(markdown) {
@@ -106,10 +128,19 @@ export class Preview {
   update(nodes, activeNodeId) {
     this.nodes = nodes;
     this.activeNodeId = activeNodeId;
+    this.flatNodes = this.flattenNodes(nodes);
     
     // 将节点数据转换为Markdown格式
     const markdown = this.nodesToMarkdown(nodes);
     this.loadMarkdown(markdown);
+    
+    // 恢复选中节点的位置
+    if (activeNodeId && this.renderer) {
+      const activeIndex = this.flatNodes.findIndex(n => n.id === activeNodeId);
+      if (activeIndex >= 0) {
+        this.renderer.setActiveIndex(activeIndex);
+      }
+    }
   }
 
   nodesToMarkdown(nodes, level = 0) {
