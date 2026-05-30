@@ -207,7 +207,7 @@ export class Presentation {
 
   cleanup() {
     if (this._onKeyDown) {
-      document.removeEventListener('keydown', this._onKeyDown);
+      document.removeEventListener('keydown', this._onKeyDown, true);
       this._onKeyDown = null;
     }
     if (this._onMouseMove) {
