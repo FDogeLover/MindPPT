@@ -59,6 +59,7 @@ export class App {
           <button class="btn" id="openFile">打开文件</button>
           <button class="btn" id="saveProject">保存项目</button>
           <button class="btn btn-accent" id="exportMindmap">导出项目</button>
+          <button class="btn btn-accent" id="presentBtn">放映</button>
           <button class="btn btn-icon" id="settingsBtn" title="设置">⚙️</button>
         </div>
       </header>
@@ -111,8 +112,31 @@ export class App {
     document.getElementById('openFile')?.addEventListener('click', () => this.openFile());
     document.getElementById('saveProject')?.addEventListener('click', () => this.saveProject());
     document.getElementById('exportMindmap')?.addEventListener('click', () => this.exportMindmap());
+    document.getElementById('presentBtn')?.addEventListener('click', () => this.present());
     document.getElementById('generateBtn')?.addEventListener('click', () => this.generateWithAI());
     document.getElementById('settingsBtn')?.addEventListener('click', () => this.toggleSettings());
+  }
+
+  async present() {
+    const { Presentation } = await import('./components/Presentation.js');
+    const nodes = this.state.projectData.nodes;
+    if (!nodes || nodes.length === 0) {
+      alert('没有可放映的节点');
+      return;
+    }
+
+    const presentContainer = document.createElement('div');
+    document.body.appendChild(presentContainer);
+
+    const presentation = new Presentation(presentContainer, {
+      nodes: nodes,
+      onExit: () => {
+        if (presentContainer.parentNode) {
+          presentContainer.parentNode.removeChild(presentContainer);
+        }
+      }
+    });
+    await presentation.init();
   }
 
   getActiveNode() {

@@ -99,6 +99,16 @@ body {
   background: #e0955a;
 }
 
+#presentBtn {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+#presentBtn:hover {
+  background: #1a4558;
+}
+
 .main-content {
   display: flex;
   flex: 1;
