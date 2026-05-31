@@ -134,6 +134,14 @@ export class App {
         if (presentContainer.parentNode) {
           presentContainer.parentNode.removeChild(presentContainer);
         }
+        // 退出放映后，延迟重新适配预览区域的缩放
+        // 等待浏览器完全退出全屏状态，容器尺寸恢复
+        setTimeout(() => {
+          if (this.preview && this.preview.renderer) {
+            this.preview.renderer.autoFitZoom();
+            this.preview.renderer.render();
+          }
+        }, 100);
       }
     });
     await presentation.init();

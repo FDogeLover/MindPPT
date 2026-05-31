@@ -206,6 +206,12 @@ export class Presentation {
   }
 
   cleanup() {
+    // 先销毁 renderer，移除其事件监听器
+    if (this.renderer) {
+      this.renderer.destroy();
+      this.renderer = null;
+    }
+    
     if (this._onKeyDown) {
       document.removeEventListener('keydown', this._onKeyDown, true);
       this._onKeyDown = null;
@@ -223,5 +229,8 @@ export class Presentation {
     if (this.element && this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
     }
+    this.element = null;
+    this.controls = null;
+    this.viewport = null;
   }
 }
