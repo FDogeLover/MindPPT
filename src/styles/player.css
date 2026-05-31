@@ -65,3 +65,35 @@
   font-size: 1rem;
   font-weight: 600;
 }
+
+/* 响应式预览节点 */
+.preview-node {
+  width: clamp(180px, 20vw, 280px);
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1440px) {
+  .preview-node {
+    width: clamp(220px, 18vw, 320px);
+    padding: 20px;
+  }
+  .preview-canvas {
+    gap: 24px;
+    padding: 32px;
+  }
+}
+
+/* 超大屏幕优化 */
+@media (min-width: 1920px) {
+  .preview-node {
+    width: clamp(260px, 16vw, 380px);
+    padding: 24px;
+  }
+  .preview-canvas {
+    gap: 28px;
+    padding: 40px;
+  }
+  .preview-node .node-title {
+    font-size: 1.1rem;
+  }
+}

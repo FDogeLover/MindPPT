@@ -56,6 +56,17 @@ export class MindmapRenderer {
     this.wheelNavigationTimer = null;
     this.swipeStart = null;
     this.imageViewer = null;
+    
+    // 保存事件监听器引用，用于销毁时移除
+    this._boundHandlers = {
+      keydown: null,
+      wheel: null,
+      resize: null,
+      touchstart: null,
+      touchmove: null,
+      touchend: null,
+      touchcancel: null,
+    };
   }
 
   init() {
@@ -164,15 +175,28 @@ export class MindmapRenderer {
       });
     }
     
-    window.addEventListener("keydown", (e) => this.handleKeydown(e));
-    window.addEventListener("wheel", (e) => this.handleWheel(e), { passive: false });
-    window.addEventListener("resize", () => this.render());
+    // 保存绑定的处理器引用，用于后续移除
+    this._boundHandlers.keydown = (e) => this.handleKeydown(e);
+    this._boundHandlers.wheel = (e) => this.handleWheel(e);
+    this._boundHandlers.resize = () => {
+      this.autoFitZoom();
+      this.render();
+    };
+    
+    window.addEventListener("keydown", this._boundHandlers.keydown);
+    window.addEventListener("wheel", this._boundHandlers.wheel, { passive: false });
+    window.addEventListener("resize", this._boundHandlers.resize);
     
     if (this.mindmap) {
-      this.mindmap.addEventListener("touchstart", (e) => this.handleTouchStart(e), { passive: true });
-      this.mindmap.addEventListener("touchmove", (e) => this.handleTouchMove(e), { passive: false });
-      this.mindmap.addEventListener("touchend", (e) => this.handleTouchEnd(e), { passive: false });
-      this.mindmap.addEventListener("touchcancel", () => this.resetSwipeStart());
+      this._boundHandlers.touchstart = (e) => this.handleTouchStart(e);
+      this._boundHandlers.touchmove = (e) => this.handleTouchMove(e);
+      this._boundHandlers.touchend = (e) => this.handleTouchEnd(e);
+      this._boundHandlers.touchcancel = () => this.resetSwipeStart();
+      
+      this.mindmap.addEventListener("touchstart", this._boundHandlers.touchstart, { passive: true });
+      this.mindmap.addEventListener("touchmove", this._boundHandlers.touchmove, { passive: false });
+      this.mindmap.addEventListener("touchend", this._boundHandlers.touchend, { passive: false });
+      this.mindmap.addEventListener("touchcancel", this._boundHandlers.touchcancel);
     }
   }
 
@@ -760,6 +784,25 @@ export class MindmapRenderer {
     };
   }
 
+  autoFitZoom() {
+    if (!this.root || !this.mindmap || this.preorder.length === 0) return;
+
+    const viewport = this.getViewportSize();
+    const activeNode = this.preorder[this.activeIndex] ?? this.preorder[0];
+    const model = activeNode ? this.buildVisibleModel(activeNode) : this.buildEndModel();
+    const bounds = this.computeModelBounds(model.nodes);
+
+    if (bounds.minX === Infinity) return;
+
+    const contentWidth = bounds.maxX - bounds.minX + this.layout.stagePaddingX * 2;
+    const contentHeight = bounds.maxY - bounds.minY + this.layout.stagePaddingY * 2;
+
+    const zoomX = viewport.width / contentWidth;
+    const zoomY = viewport.height / contentHeight;
+
+    this.cameraZoom = this.clamp(Math.min(zoomX, zoomY) * 0.9, 0.5, 2.0);
+  }
+
   syncNodes(nodes, activeNode) {
     const liveIds = new Set(nodes.map((node) => node.id));
 
@@ -1056,6 +1099,67 @@ export class MindmapRenderer {
     }
     
     this.updateDeckHeading(this.root.label);
+    this.autoFitZoom();
     this.render();
+  }
+
+  destroy() {
+    // 移除 window 级别的事件监听器
+    if (this._boundHandlers.keydown) {
+      window.removeEventListener("keydown", this._boundHandlers.keydown);
+    }
+    if (this._boundHandlers.wheel) {
+      window.removeEventListener("wheel", this._boundHandlers.wheel);
+    }
+    if (this._boundHandlers.resize) {
+      window.removeEventListener("resize", this._boundHandlers.resize);
+    }
+    
+    // 移除 mindmap 的触摸事件监听器
+    if (this.mindmap) {
+      if (this._boundHandlers.touchstart) {
+        this.mindmap.removeEventListener("touchstart", this._boundHandlers.touchstart);
+      }
+      if (this._boundHandlers.touchmove) {
+        this.mindmap.removeEventListener("touchmove", this._boundHandlers.touchmove);
+      }
+      if (this._boundHandlers.touchend) {
+        this.mindmap.removeEventListener("touchend", this._boundHandlers.touchend);
+      }
+      if (this._boundHandlers.touchcancel) {
+        this.mindmap.removeEventListener("touchcancel", this._boundHandlers.touchcancel);
+      }
+    }
+    
+    // 清除定时器
+    if (this.wheelNavigationTimer) {
+      window.clearTimeout(this.wheelNavigationTimer);
+      this.wheelNavigationTimer = null;
+    }
+    
+    // 移除 imageViewer DOM 节点
+    if (this.imageViewer) {
+      const overlay = document.querySelector('.image-viewer');
+      if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+      this.imageViewer = null;
+    }
+    
+    // 清除渲染的节点和链接
+    if (this.renderedNodes) {
+      this.renderedNodes.clear();
+    }
+    if (this.renderedLinks) {
+      this.renderedLinks.clear();
+    }
+    
+    // 清除其他引用
+    this._boundHandlers = null;
+    this.mindmap = null;
+    this.mapLayer = null;
+    this.linkLayer = null;
+    this.nodeLayer = null;
+    this.container = null;
   }
 }
