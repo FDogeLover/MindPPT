@@ -77,6 +77,17 @@
   3. 修改回调中的key，也使用完整路径
 - **变更**: 修改 `src/config/settings-config.js` 和 `src/components/SettingsPanel.js`
 
+### 2026-05-30: 项目框架检查与修复
+- **决策**: 全面更新AGENTS.md，反映项目实际状态
+- **原因**: AGENTS.md描述的是"思维导图PPT演示"项目，但实际是"思维导图PPT编辑器"，文档与实现严重不符
+- **方案**:
+  1. 更新项目描述：从演示器改为编辑器
+  2. 补充编辑器功能模块文档（NodeTree、NodeEditor、Preview等）
+  3. 更新核心文件结构：反映实际的src/styles/目录
+  4. 修复配置一致性：移除不存在的build脚本
+  5. 保留source.js作为示例数据参考
+- **变更**: 修改 `AGENTS.md`、`package.json`，更新 `MEMORY.md`
+
 ## 技术发现
 
 ### 模板项目特点
@@ -254,3 +265,11 @@
 - 修复 2：localStorage 数据格式不兼容（字符串 vs 对象 color）导致 `setNestedValue` 报错
 - 修复 3：节点文字颜色变量隔离（`--text-color` → `--node-text-color`），防止影响 UI 元素
 - 验证开发服务器正常运行
+
+### Session 8: 2026-05-30 (项目框架检查与修复)
+- 全面检查项目框架符合性
+- 发现AGENTS.md与实际项目状态严重不符
+- 更新AGENTS.md：从"思维导图PPT演示"改为"思维导图PPT编辑器"
+- 补充编辑器功能模块文档（NodeTree、NodeEditor、Preview等）
+- 修复配置一致性：移除不存在的build脚本
+- 保留source.js作为示例数据参考
